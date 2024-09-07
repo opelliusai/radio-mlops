@@ -1,4 +1,5 @@
 # Specific to the radio-mlops project
+streamlit_users.json
 docs/*$*
 kaggle.json
 src/config/PROD_run_config.py
