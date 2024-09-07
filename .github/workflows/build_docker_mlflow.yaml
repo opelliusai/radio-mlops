@@ -34,5 +34,5 @@ jobs:
 
     - name: Tag and push Docker image
       run: |
-        docker tag mlflow:latest ${{ secrets.DOCKER_USERNAME }}/mlflow:latest
-        docker push ${{ secrets.DOCKER_USERNAME }}/mlflow:latest
+        docker tag mlflow_mlops:latest ${{ secrets.DOCKER_USERNAME }}/mlflow_mlops:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/mlflow_mlops:latest
