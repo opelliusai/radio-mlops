@@ -22,4 +22,3 @@ EXPOSE 8084
 ENV PYTHONPATH "${PYTHONPATH}:/app/src"
 
 CMD python src/utils/utils_folders_init.py && streamlit run src/streamlit/Accueil.py --server.port 8084
-#CMD ["streamlit", "run", "src/streamlit/Accueil.py","--server.port","8084"]
