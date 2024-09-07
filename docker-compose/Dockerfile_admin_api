@@ -14,6 +14,7 @@ RUN mkdir /app/src/mlflow
 RUN mkdir /app/src/models
 RUN mkdir /app/src/utils
 RUN mkdir /root/.kaggle
+RUN mkdir -p /app/data
 RUN mkdir /app/data/streamlit_cache
 
 
