@@ -2,23 +2,25 @@
 Créé le 07/08/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
-@summary: API d'administration 
+@summary: API d'administration
 -- Etend l'API utilisateur avec des fonctionnalités d'administration
 -- Gestion des datasets: téléchargement, nettoyage, mise à jour
--- Modèles: Entrainement, réentrainement, déploiement ou préparation au déploiement
+-- Modèles: Entrainement, réentrainement, 
+déploiement ou préparation au déploiement
 '''
 
 # IMPORTS
 # Imports externes
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
-from prometheus_client import CollectorRegistry, Counter, Histogram, Summary, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CollectorRegistry, Counter, Histogram, Summary
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 import time
 import uvicorn
 from pydantic import BaseModel
 # Imports internes
 from src.utils import utils_data, utils_models
-from src.datasets import download_dataset, clean_dataset, update_dataset
+from src.datasets import download_dataset, update_dataset
 from src.mlflow import model_tracking, model_serving
 from src.config.log_config import setup_logging
 from src.config.run_config import model_hp
@@ -114,7 +116,7 @@ async def download_new_dataset():
     return JSONResponse(status_code=200,
                         content={"status": "Téléchargement terminé"})
 
-# Mise à jour du Dataset de référence avec des données de production ou kaggle
+# Mise à jour du Dataset de référence avec des données de PROD ou KAGGLE
 
 
 @app.post("/update_dataset",
@@ -122,7 +124,7 @@ async def download_new_dataset():
           description="Données de PROD ou de KAGGLE.")
 async def update_dataset_ref(dataset_path: str = None,
                              source_type: str = "KAGGLE",
-                             # mise à jour par défaut avec des données de kaggle
+                             # mise à jour par défaut avec des dataset kaggle
                              base_dataset_id: int = None):
     update_dataset.update_dataset_ref(
         dataset_path, source_type, base_dataset_id)
@@ -206,7 +208,8 @@ def deploy_ready_model():
           description="Déployer un modèle qui a un tag prêt pour la PROD")
 def force_model(num_version: str):
     model_serving.model_version_serving(num_version=num_version)
-    return JSONResponse(status_code=200, content={"status": "Déploiement terminé"})
+    return JSONResponse(status_code=200,
+                        content={"status": "Déploiement terminé"})
 
 # Liste et informations sur les modèles disponibles
 
