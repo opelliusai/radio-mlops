@@ -1,6 +1,6 @@
 # Specific to the radio-mlops project
 src/config/PROD_run_config.py
-actions_runner
+actions-runner
 data
 logs
 wandb
