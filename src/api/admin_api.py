@@ -38,11 +38,18 @@ app = FastAPI(
 # Définition des métriques Prometheus
 collector = CollectorRegistry()
 ADMIN_API_REQUEST_TIME = Summary(
-    'MLOps_admin_api_request_processing_seconds', 'Time spent processing request', registry=collector)
-ADMIN_API_REQUEST_COUNT = Counter(name='MLOps_admin_api_request_count', labelnames=[
-                                  'method', 'endpoint'], documentation='Total number of requests', registry=collector)
-ADMIN_API_DURATION_OF_REQUESTS = Histogram(name='MLOps_admin_api_duration_of_requests', documentation='duration of requests per method or endpoint',
-                                           labelnames=['method', 'endpoint'], registry=collector)
+    'MLOps_admin_api_request_processing_seconds',
+    'Time spent processing request',
+    registry=collector)
+ADMIN_API_REQUEST_COUNT = Counter(name='MLOps_admin_api_request_count',
+                                  labelnames=['method', 'endpoint'],
+                                  documentation='Total number of requests',
+                                  registry=collector)
+ADMIN_API_DURATION_OF_REQUESTS = Histogram(
+    name='MLOps_admin_api_duration_of_requests',
+    documentation='duration of requests per method or endpoint',
+    labelnames=['method', 'endpoint'],
+    registry=collector)
 
 # Dépendance pour mesurer le temps et compter les requêtes
 
@@ -81,7 +88,9 @@ async def metrics():
 # Health Check
 
 
-@app.get("/", summary="Health Check", description="Vérification de l'état de l'application")
+@app.get("/",
+         summary="Health Check",
+         description="Vérification de l'état de l'application")
 async def health_check():
     return JSONResponse(status_code=200, content={"status": "OK"})
 
@@ -96,27 +105,35 @@ class AddUserRequest(BaseModel):
 # Lancer un téléchargement des données
 
 
-@app.get("/download_dataset", summary="Téléchargement du dataset Kaggle", description="Lancement et versioning du téléchargement du dataset Kaggle, basé sur les fichiers de configuration")
+@app.get("/download_dataset",
+         summary="Téléchargement du dataset Kaggle",
+         description="Téléchargement du dataset Kaggle")
 async def download_new_dataset():
     # Télécharger le dataset
     download_dataset.download_dataset_main()
-    return JSONResponse(status_code=200, content={"status": "Téléchargement terminé"})
+    return JSONResponse(status_code=200,
+                        content={"status": "Téléchargement terminé"})
 
 # Mise à jour du Dataset de référence avec des données de production ou kaggle
 
 
-@app.post("/update_dataset", summary="Mise à jour du dataset de référence avec des données de prod ou de kaggle", description="Mise à jour du Dataset de Reference avec les données de PROD ou de KAGGLE. Si aucun chemin de dataset n'est spécifié, on met à jour avec la dernière version disponible")
+@app.post("/update_dataset",
+          summary="Mise à jour du dataset de référence",
+          description="Données de PROD ou de KAGGLE.")
 async def update_dataset_ref(dataset_path: str = None,
-                             source_type: str = "KAGGLE",  # mise à jour par défaut avec des données de kaggle
+                             source_type: str = "KAGGLE",
+                             # mise à jour par défaut avec des données de kaggle
                              base_dataset_id: int = None):
     update_dataset.update_dataset_ref(
         dataset_path, source_type, base_dataset_id)
-    return JSONResponse(status_code=200, content={"status": "Mise à jour terminée"})
+    return JSONResponse(status_code=200,
+                        content={"status": "Mise à jour terminée"})
 
 # Entrainement d'un modèle
 
 
-@app.post("/train_model", summary="Entrainement d'un modèle", description="Entrainement d'un modèle avec plusieurs options")
+@app.post("/train_model", summary="Entrainement d'un modèle",
+          description="Entrainement d'un modèle avec plusieurs options")
 def train_model(retrain: bool = False,
                 model_name: str = None,
                 model_version: str = None,
@@ -150,49 +167,43 @@ def train_model(retrain: bool = False,
     # run_id, model_name, model_version = model_tracking.main(
     # dataset_version, max_epochs, num_trials,)
     run_id, model_name, model_version = model_tracking.main(
-        retrain, model_name, model_version, include_prod_data, balance, dataset_version, max_epochs, num_trials)
-    return JSONResponse(status_code=200, content={"status": "Entrainement terminé", "run_id": run_id, "model_name": model_name, "model_version": model_version})
+        retrain, model_name, model_version, include_prod_data,
+        balance, dataset_version, max_epochs, num_trials)
+    return JSONResponse(status_code=200,
+                        content={"status": "Entrainement terminé",
+                                 "run_id": run_id,
+                                 "model_name": model_name,
+                                 "model_version": model_version})
 
 
-'''
-@app.get("/clean_dataset", summary="Nettoyage d'un dataset", description="Nettoyage et restructuration du dataset si besoin")
-async def clean_new_dataset():
-    current_version, new_version = clean_dataset.clean_dataset_main()
-    return JSONResponse(status_code=200, content={"status": "Nettoyage terminé", "current_dataset_version": current_version, "new_dataset_version": new_version})
-
-
-
-@app.post("/retrain_model", summary="Réentrainement d'un modèle", description="Réentrainement d'un modèle")
-def retrain_model(max_epochs: int,
-                  num_trials: int,
-                  option="ZERO"):
-    # zero: from scracth with current dataset
-    # combined : from scracth with New + current data
-    # diff : Retrain current model with new data only
-    run_id, model_name, model_version = model_tracking.main_train_model(
-        max_epochs, num_trials, option)
-    return JSONResponse(status_code=200, content={"status": "Réentrainement terminé", "run_id": run_id, "model_name": model_name, "model_version": model_version})
-'''
 # Mise à jour du tag d'un modèle pour le rendre prêt à être déployé
 
 
-@app.post("/make_model_prod_ready", summary="Rendre un modèle prêt pour la PROD", description="Mise à jour du tag d'un modèle pour qu'il soit déployé au prochain batch")
+@app.post("/make_model_prod_ready",
+          summary="Rendre un modèle prêt pour la PROD",
+          description="Préparation du modèle déploiement au prochain batch")
 def make_model_prod_ready(num_version):
     model_serving.make_prod_ready(num_version=num_version)
-    return JSONResponse(status_code=200, content={"status": "Mise à jour terminée"})
+    return JSONResponse(status_code=200,
+                        content={"status": "Mise à jour terminée"})
 
 # Déploiement d'un modèle prêt pour la PRODUCTION
 
 
-@app.post("/deploy_ready_model", summary="Déployer un modèle prêt pour la PROD", description="Déployer un modèle qui a un tag prêt pour la PROD")
+@app.post("/deploy_ready_model",
+          summary="Déployer un modèle prêt pour la PROD",
+          description="Déployer un modèle qui a un tag prêt pour la PROD")
 def deploy_ready_model():
     model_serving.auto_model_serving()
-    return JSONResponse(status_code=200, content={"status": "Déploiement en production terminée"})
+    return JSONResponse(status_code=200,
+                        content={"status": "Déploiement en PROD terminé"})
 
 # Forcer le déploiement d'un modèle en PRODUCTION
 
 
-@app.post("/force_model_serving", summary="Déployer un modèle prêt pour la PROD", description="Déployer un modèle qui a un tag prêt pour la PROD")
+@app.post("/force_model_serving",
+          summary="Déployer un modèle prêt pour la PROD",
+          description="Déployer un modèle qui a un tag prêt pour la PROD")
 def force_model(num_version: str):
     model_serving.model_version_serving(num_version=num_version)
     return JSONResponse(status_code=200, content={"status": "Déploiement terminé"})
@@ -200,39 +211,54 @@ def force_model(num_version: str):
 # Liste et informations sur les modèles disponibles
 
 
-@app.get("/get_models_list", summary="Liste tous les modèles disponibles", description="Liste tous les modèles disponibles dans le but d'en sélectionner le prochain qui sera à déployer")
+@app.get("/get_models_list",
+         summary="Liste tous les modèles disponibles",
+         description="Liste tous les modèles disponibles")
 def get_models_list():
     list_models, runs_info = utils_models.get_models()
 
-    return JSONResponse(status_code=200, content={"status": "OK", "list_models": list_models, "runs_info": runs_info})
+    return JSONResponse(status_code=200,
+                        ontent={"status": "OK",
+                                "list_models": list_models,
+                                "runs_info": runs_info})
 
 # Liste et informations sur les runs MLFlow
 
 
-@app.post("/get_runs_info", summary="Récupérer les informations sur un ou plusieurs run", description="Récupérer les informations  d'un ou plusieurs run pour afficher les inforamtions")
+@app.post("/get_runs_info",
+          summary="Récupérer les informations sur un ou plusieurs run",
+          description="Récupérer les informations des RUNs MLFlow")
 def get_runs_info(run_ids: list):
     runs_info = utils_models.get_runs_info(run_ids)
-    return JSONResponse(status_code=200, content={"status": "OK", "runs_info": runs_info})
+    return JSONResponse(status_code=200,
+                        content={"status": "OK", "runs_info": runs_info})
 
 # Liste et informations sur les datasets disponibles
 
 
-@app.post("/get_datasets_list", summary="Lister les datasets disponibles", description="Lister les datasets disponibles pour définir le périmètre d'entrainement d'un modèle")
+@app.post("/get_datasets_list",
+          summary="Lister les datasets disponibles",
+          description="Lister les datasets disponibles")
 def get_datasets_list(type: str = "REF"):
     list_datasets = utils_data.get_all_dataset_info(type)
     data = list_datasets.to_dict(orient='records')
 
-    return JSONResponse(status_code=200, content={"status": "OK", "list_datasets": data})
+    return JSONResponse(status_code=200,
+                        content={"status": "OK", "list_datasets": data})
 
 
-# Ajout d'un batch d'images et leur label - Utile pour l'administrateur pour charger un lot de données externes
+# Ajout d'un batch d'images et leur label
+# Utile pour l'administrateur pour charger un lot de données externes
 
 
 @app.post("/add_images", summary="", description="")
 async def add_images(images_labels: list):  # dict chemin/label
-    old_dataset_version, new_dataset_version = update_dataset.add_mutliple_images(
+    ds_old_version, ds_new_version = update_dataset.add_mutliple_images(
         images_labels)
-    return JSONResponse(status_code=200, content={"status": "OK", "old_dataset_version": old_dataset_version, "new_dataset_version": new_dataset_version})
+    return JSONResponse(status_code=200,
+                        content={"status": "OK",
+                                 "old_dataset_version": ds_old_version,
+                                 "new_dataset_version": ds_new_version})
 
 if __name__ == "__main__":
     # Lancement de l'API sur le port associé

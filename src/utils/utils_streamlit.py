@@ -8,13 +8,14 @@ Créé le 08/08/2024
 '''
 
 # IMPORTS
+from src.config.log_config import setup_logging
 import requests
 import pandas as pd
 import os
 import streamlit as st
 # Import des fichiers de configuration et des informations sur les logs
-from src.config.run_config import init_paths, infolog, user_api_info, admin_api_info, monitoring_api_info
-from src.config.log_config import setup_logging
+from src.config.run_config import init_paths, user_api_info
+from src.config.run_config import admin_api_info, monitoring_api_info
 
 logger = setup_logging("UTILS_STREAMLIT")
 
@@ -81,27 +82,27 @@ logger.debug(f"API_URL_DRIFT_METRICS : {API_URL_DRIFT_METRICS}")
 
 def lancer_une_prediction(file, filename):
     logger.debug(
-        f"----------------lancer_une_prediction(filename = {filename})------------")
+        f"-----------lancer_une_prediction(filename = {filename})----------")
     logger.debug(f"prediction_url = {API_URL_PREDICT}")
     files = {"image": (filename, file, "image/jpeg")}
 
     response = requests.post(API_URL_PREDICT, files=files)
 
     if response.status_code == 200:
-        model_name = response.json().get("model_name")
+        model = response.json().get("model_name")
         prediction = response.json().get('prediction')
         confiance = response.json().get('confiance')
-        temps_prediction = response.json().get('temps_prediction')
-        image_upload_path = response.json().get('image_upload_path')
+        temps_pred = response.json().get('temps_prediction')
+        image_path = response.json().get('image_upload_path')
         pred_id = response.json().get('pred_id')
-        logger.debug(f"model_name = {model_name}")
+        logger.debug(f"model_name = {model}")
         logger.debug(f"prediction = {prediction}")
         logger.debug(f"confiance = {confiance}")
-        logger.debug(f"temps_prediction = {temps_prediction}")
-        logger.debug(f"image_upload_path = {image_upload_path}")
+        logger.debug(f"temps_prediction = {temps_pred}")
+        logger.debug(f"image_upload_path = {image_path}")
         logger.debug(f"pred_id = {pred_id}")
 
-        return model_name, prediction, confiance, temps_prediction, image_upload_path, pred_id
+        return model, prediction, confiance, temps_pred, image_path, pred_id
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None
@@ -109,7 +110,7 @@ def lancer_une_prediction(file, filename):
 
 def ajout_image(image_path, label):
     logger.debug(
-        f"----------------ajout_image_dataset(image_path={image_path},label={label})------------")
+        f"----ajout_image_dataset(image_path={image_path},label={label})---")
     logger.debug(f"add_image_url = {API_URL_ADD_IMAGE}")
     data = {
         "image_path": image_path,
@@ -131,7 +132,6 @@ def ajout_image(image_path, label):
 
 def admin_get_datasets():
     logger.debug("----------------admin_get_datasets()------------")
-    # logger.debug(f"Lancement de la prédiction pour le fichier {file.filename}")
     # Essayer de se connecter pour obtenir le token
     logger.debug(f"get_list_datasets = {API_URL_GET_LIST_DATASETS}")
 
@@ -147,8 +147,7 @@ def admin_get_datasets():
 
 def admin_get_prod_datasets():
     logger.debug("----------------admin_get_prod_datasets()------------")
-    # logger.debug(f"Lancement de la prédiction pour le fichier {file.filename}")
-    # Essayer de se connecter pour obtenir le token
+    # Connexion pour obtenir le token
     logger.debug(f"admin_get_prod_datasets = {API_URL_GET_LIST_DATASETS}")
     data = {
         "type": "PROD"
@@ -167,9 +166,11 @@ def admin_get_prod_datasets():
 def admin_train_model(dataset_version, max_epochs, num_trials):
 
     logger.debug(
-        f"----------------admin_train_model(dataset_version={dataset_version},max_epochs={max_epochs},num_trials={num_trials})------------")
-    # logger.debug(f"Lancement de la prédiction pour le fichier {file.filename}")
-    # Essayer de se connecter pour obtenir le token
+        "--admin_train_model(dataset_version,max_epochs,num_trials)--")
+
+    logger.debug(
+        f"--admin_train_model({dataset_version},{max_epochs},{num_trials})-")
+    # Connexion pour obtenir un token
     logger.debug(f"train_url = {API_URL_TRAIN_MODEL}")
     data = {
         "dataset_version": dataset_version,
@@ -190,7 +191,7 @@ def admin_train_model(dataset_version, max_epochs, num_trials):
 
 
 def admin_get_models():
-    logger.debug(f"----------------admin_get_models(model_name=)------------")
+    logger.debug(f"----------------admin_get_models(model_name=)----------")
     # Essayer de se connecter pour obtenir le token
     logger.debug(f"get_models_list = {API_URL_GET_LIST_MODELS}")
 
@@ -241,7 +242,7 @@ def admin_force_model_serving(num_version):
 
 def admin_log_prediction(pred_id, label):
     logger.debug(
-        f"----------admin_log_prediction(pred_id={pred_id},label={label})----------")
+        f"-------admin_log_prediction(pred_id={pred_id},label={label})----")
     url = API_URL_LOG_PREDICTION
     logger.debug(f"url = {url}")
     data = {
@@ -261,7 +262,7 @@ def admin_log_prediction(pred_id, label):
 
 def admin_ajout_images(images_labels):
     logger.debug(
-        f"----------------ajout_image_dataset(image_path={image_path},label={label})------------")
+        f"--------ajout_image_dataset(image_labels={images_labels})-------")
     logger.debug(f"add_image_url = {API_URL_ADD_IMAGES}")
     data = {
         "images_labels": images_labels
@@ -276,8 +277,8 @@ def admin_ajout_images(images_labels):
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None
 
-
 # Monitoring
+
 
 def lancer_drift_detection():
     logger.debug(f"----------------lancer_drift_detection()------------")
@@ -357,8 +358,10 @@ def lancer_drift_detection_avec_reentrainement():
 def admin_retrain_model(max_epochs, num_trials, option):
 
     logger.debug(
-        f"----------------admin_retrain_model(max_epochs={max_epochs},num_trials={num_trials},option={option})------------")
-    # logger.debug(f"Lancement de la prédiction pour le fichier {file.filename}")
+        f"---------admin_retrain_model(max_epochs,num_trials,option)------")
+
+    logger.debug(
+        f"-------admin_retrain_model({max_epochs},{num_trials}{option})---")
     # Essayer de se connecter pour obtenir le token
     logger.debug(f"retrain_url = {API_URL_RETRAIN_MODEL}")
     data = {
@@ -382,21 +385,18 @@ def admin_retrain_model(max_epochs, num_trials, option):
 # Health Check
 def health_check_apps():
     df_urls = pd.read_csv(os.path.join(
-        init_paths["main_path"], init_paths["streamlit_assets_folder"], "url_info.csv"))
+        init_paths["main_path"],
+        init_paths["streamlit_assets_folder"],
+        "url_info.csv"))
 
-    # Initialize a new column 'Status'
     df_urls['Status'] = ''
 
-    # Iterate over each row in the DataFrame
     for index, row in df_urls.iterrows():
-        # Concatenate 'http://localhost:' with the 'Port' value
         url = monitoring_api_info["URLS_PREFIX"] + ":" + str(row['Port'])
         logger.debug(f"URL Service {row['Service']} / {url}")
-        # Send a GET request to the URL
+
         try:
             response = requests.get(url, timeout=5)
-
-            # If the status code is 200, set 'Status' to 'OK', otherwise set it to 'KO'
             if response.status_code == 200:
                 df_urls.at[index, 'Status'] = 'UP'
             else:
@@ -408,15 +408,6 @@ def health_check_apps():
     df_urls = df_urls.reset_index(drop=True)
     df_urls['Port'] = df_urls['Port'].astype(str)
     return df_urls
-
-
-def login1(username, password):
-    response = requests.post(API_URL_LOGIN,
-                             json={"username": username, "password": password})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
 
 # Fonction de connexion
 
