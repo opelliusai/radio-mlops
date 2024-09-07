@@ -1,5 +1,6 @@
 # Specific to the radio-mlops project
 src/config/PROD_run_config.py
+data/streamlit_cache
 actions-runner
 data
 logs
