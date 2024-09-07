@@ -1,0 +1,13 @@
+python-dotenv
+keras==2.13.1
+numpy==1.23.5
+tensorflow==2.13.1
+scikit-learn
+mlflow
+uvicorn
+python-multipart
+fastapi
+pydantic
+PyJWT
+prometheus-client
+seaborn

@@ -1,0 +1,19 @@
+services:
+  monitoring_api:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_monitoring_api
+    image: monitoring_api:latest
+    container_name: monitoring_api
+    #environment:
+    ports:
+      - "8083:8083"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+volumes:
+  main_volume:
+  logs:
+  shared_data:
+  

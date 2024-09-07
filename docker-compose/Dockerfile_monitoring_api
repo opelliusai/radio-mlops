@@ -1,0 +1,34 @@
+FROM python:3.10
+
+RUN apt-get update && apt-get install -y libhdf5-dev
+
+WORKDIR /app
+
+COPY requirements/requirements_monitoring_api.txt /app
+
+RUN mkdir /app/src
+RUN mkdir /app/src/api
+RUN mkdir /app/src/config
+RUN mkdir /app/src/datasets
+RUN mkdir /app/src/mlflow
+RUN mkdir /app/src/models
+RUN mkdir /app/src/utils
+RUN mkdir /root/.kaggle
+
+COPY src/__init__.py /app/src
+COPY src/api/__init__.py /app/src/api
+COPY src/api/monitoring_api.py /app/src/api
+COPY src/config /app/src/config
+COPY src/datasets /app/src/datasets
+COPY src/mlflow /app/src/mlflow
+COPY src/models /app/src/models
+COPY src/utils /app/src/utils
+
+RUN pip install -r requirements_monitoring_api.txt
+
+EXPOSE 8083
+ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+
+RUN python /app/src/utils/utils_folders_init.py
+
+CMD python src/utils/utils_folders_init.py &&  python src/api/monitoring_api.py

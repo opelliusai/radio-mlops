@@ -1,3 +1,33 @@
+# Specific to the radio-mlops project
+src/config/PROD_run_config.py
+data
+logs
+wandb
+grafana
+prometheus
+*/__pycache__
+*/*/__pycache__
+*/*/*/__pycache__
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+*.sh
+mlruns  
+radioEnv
+.vscode
+mlflow.db
+.env
+*/.env
+*.sh
+airflow
+dags
+src/streamlit/pages/tests.py
+workspace
+evidently
+mlops-workspace
+.kaggle
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

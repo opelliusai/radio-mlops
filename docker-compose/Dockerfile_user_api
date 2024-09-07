@@ -1,0 +1,36 @@
+FROM python:3.10
+
+RUN apt-get update && apt-get install -y libhdf5-dev
+
+WORKDIR /app
+
+COPY ../requirements/requirements_user_api.txt /app/requirements_user_api.txt
+
+RUN mkdir -p /app/data
+RUN mkdir /app/data/streamlit_cache
+RUN mkdir /app/src
+RUN mkdir /app/src/api
+RUN mkdir /app/src/config
+RUN mkdir /app/src/datasets
+RUN mkdir /app/src/models
+RUN mkdir /app/src/utils
+
+    
+COPY ../src/__init__.py /app/src
+COPY ../src/api/__init__.py /app/src/api
+COPY ../src/api/user_api.py /app/src/api
+COPY ../src/config /app/src/config
+COPY ../src/datasets /app/src/datasets
+COPY ../src/models /app/src/models
+COPY ../src/utils /app/src/utils
+
+COPY ../data/streamlit_cache/streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
+COPY ../.env /app
+
+RUN pip install -r requirements_user_api.txt
+
+EXPOSE 8081
+ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+
+# Folder init pour l'initilisation de tous les répertoires de données
+CMD python src/utils/utils_folders_init.py &&  python src/api/user_api.py

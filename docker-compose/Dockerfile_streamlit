@@ -1,0 +1,25 @@
+FROM python:3.10
+RUN echo "App Streamlit Métier"
+RUN apt-get update && apt-get install -y libhdf5-dev
+
+WORKDIR /app
+
+COPY requirements/requirements_streamlit.txt /app/requirements_streamlit.txt
+
+RUN mkdir src
+RUN mkdir src/streamlit
+
+COPY src/__init__.py /app/src
+COPY src/streamlit/Accueil.py /app/src/streamlit/Accueil.py
+COPY src/streamlit/st_pages /app/src/streamlit/st_pages
+COPY src/utils /app/src/utils
+COPY src/config /app/src/config
+
+
+RUN pip install -r requirements_streamlit.txt
+
+EXPOSE 8084
+ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+
+CMD python src/utils/utils_folders_init.py && streamlit run src/streamlit/Accueil.py --server.port 8084
+#CMD ["streamlit", "run", "src/streamlit/Accueil.py","--server.port","8084"]

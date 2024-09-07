@@ -1,0 +1,19 @@
+services:
+  streamlit:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_streamlit
+    image: streamlit:latest
+    container_name: streamlit
+    #environment:
+    ports:
+      - "8084:8084"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+volumes:
+  main_volume:
+  logs:
+  shared_data:
+  

@@ -1,0 +1,82 @@
+services:
+  user_api:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_user_api
+    image: user_api:latest
+    container_name: user_api
+    #environment:
+    ports:
+      - "8081:8081"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+  admin_api:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_admin_api
+    image: admin_api:latest
+    container_name: admin_api
+    #environment:
+    ports:
+      - "8082:8082"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+  monitoring_api:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_monitoring_api
+    image: monitoring_api:latest
+    container_name: monitoring_api
+    #environment:
+    ports:
+      - "8083:8083"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+  mlflow:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_MLFlow
+      #image: mlflow:latest
+    container_name: mlflow
+    ports:
+      - "8090:8090"
+    volumes:
+      - main_volume:/mlflow
+      - shared_data:/app/data
+  streamlit:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_streamlit
+    image: streamlit:latest
+    container_name: streamlit
+    #environment:
+    ports:
+      - "8084:8084"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+  streamlit_pres:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_streamlit_pres
+    image: streamlit_pres:latest
+    container_name: streamlit_pres
+    #environment:
+    ports:
+      - "8085:8085"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+volumes:
+  main_volume:
+  logs:
+  shared_data:
+  

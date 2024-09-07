@@ -1,0 +1,19 @@
+services:
+  admin_api:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_admin_api
+    image: admin_api:latest
+    container_name: admin_api
+    #environment:
+    ports:
+      - "8082:8082"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+volumes:
+  main_volume:
+  logs:
+  shared_data:
+  

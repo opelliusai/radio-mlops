@@ -1,0 +1,22 @@
+FROM python:3.10
+
+RUN echo "App Streamlit Présentation"
+RUN apt-get update && apt-get install -y libhdf5-dev
+
+WORKDIR /app
+
+COPY requirements/requirements_streamlit_pres.txt /app/requirements_streamlit_pres.txt
+
+RUN mkdir src
+RUN mkdir src/streamlit_pres
+
+COPY src/__init__.py /app/src
+COPY src/streamlit_pres /app/src/streamlit_pres
+COPY src/streamlit_pres/pages /app/src/streamlit_pres/pages
+
+RUN pip install -r requirements_streamlit_pres.txt
+
+EXPOSE 8085
+ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+
+CMD streamlit run src/streamlit_pres/Accueil.py --server.port 8085
