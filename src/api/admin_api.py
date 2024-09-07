@@ -2,7 +2,7 @@
 Créé le 07/08/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
-@summary: API d'administration
+@summary:API d'administration
 -- Etend l'API utilisateur avec des fonctionnalités d'administration
 -- Gestion des datasets: téléchargement, nettoyage, mise à jour
 -- Modèles: Entrainement, réentrainement, 

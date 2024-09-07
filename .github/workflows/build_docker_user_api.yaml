@@ -1,0 +1,29 @@
+name: Docker Build User API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build User API Docker image
+      run: |
+        docker-compose -f docker-compose/docker-compose_user_api.yml build --no-cache
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Tag and push Docker image
+      run: |
+        docker tag user_api:latest ${{ secrets.DOCKER_USERNAME }}/user_api:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/user_api:latest
