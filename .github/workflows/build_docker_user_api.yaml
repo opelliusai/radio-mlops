@@ -14,10 +14,10 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Build User API Docker image
-      uses: docker/compose-action@v1
+      uses: docker/compose-cli@v1
       with:
         compose-file: docker-compose/docker-compose_user_api.yml
-        
+
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
