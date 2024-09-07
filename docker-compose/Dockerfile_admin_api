@@ -23,7 +23,8 @@ COPY src/datasets /app/src/datasets
 COPY src/mlflow /app/src/mlflow
 COPY src/models /app/src/models
 COPY src/utils /app/src/utils
-COPY .kaggle /root/.kaggle
+COPY kaggle.json /root/.kaggle
+COPY ../.env /app
 
 RUN pip install -r requirements_admin_api.txt
 
