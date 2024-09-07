@@ -19,6 +19,7 @@ jobs:
           echo "API_KEY=${{ secrets.USER_API_KEY }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "${{ secrets.KAGGLE_JSON }}" | base64 -d > kaggle.json
+          echo '${{ secrets.USERS_JSON }}' | base64 > streamlit_users.json
           docker-compose -f docker-compose/docker-compose_admin_api.yml build --no-cache
 
     - name: Login to Docker Hub

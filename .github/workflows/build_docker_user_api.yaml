@@ -9,7 +9,7 @@ jobs:
   build:
     #runs-on: self-hosted
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -18,7 +18,7 @@ jobs:
       run: |
           echo "API_KEY=${{ secrets.USER_API_KEY }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-          echo "${{ secrets.USERS_JSON }}" | base64 -d > streamlit_users.json
+          echo '${{ secrets.USERS_JSON }}' | base64 > streamlit_users.json
           docker-compose -f docker-compose/docker-compose_user_api.yml build --no-cache
 
     - name: Login to Docker Hub
