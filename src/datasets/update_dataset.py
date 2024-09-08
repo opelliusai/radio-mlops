@@ -182,6 +182,68 @@ def add_one_image(image_path, label="UNLABELED"):
 
     return "OK"
 
+# Mise à jour du label d'une image
+
+
+def update_image(image_uid, label):
+    """
+    Mise à jour du label et met à jour les métadonnées associées.
+    Ces données sont stockées dans le DATASET de PROD
+    :param image_uid: Le chemin de l'image à ajouter.
+    :type image_uid: str
+
+    :param label: Le label proposé à l'image.
+    :type label: str
+
+    :raises Exception: En cas d'erreur non gérée.
+
+    :return: "OK" si l'opération est réussie.
+    :rtype: str
+    """
+    logger.debug(
+        f"update_image(image_path={update_image},label={label})")
+
+    current_prod_dataset = utils_data.get_latest_dataset_info("PROD")
+    if current_prod_dataset is None:
+        logger.error("Aucun Dataset de PROD trouvé.")
+    else:
+        dataset_path = current_prod_dataset["Chemin du Dataset"]
+        metadata_path = os.path.join(dataset_path, "metadata.csv")
+        # Lecture du dataset pour trouver le chemin de l'image
+        df = pd.read_csv(metadata_path)
+        image_row = df[df["UID"] == image_uid]
+        if image_row.empty:
+            logger.error(f"Aucune image trouvée avec l'UID {image_uid}.")
+        else:
+            rep = image_row["Sous-répertoire CIBLE"].values[0]
+            new_rep = utils_data.remove_space_from_foldername(label)
+            nom_image = image_row["Nom de fichier"].values[0]
+            logger.debug(f"rep {rep}")
+            logger.debug(f"new_rep {new_rep}")
+            logger.debug(f"nom_image {nom_image}")
+            chemin_image = os.path.join(dataset_path, rep, nom_image)
+            chemin_cible = os.path.join(dataset_path, new_rep, nom_image)
+            logger.debug(
+                "Déplacement de l'image du répertoire {rep} à {new_rep}")
+            utils_data.move_file(chemin_image, chemin_cible)
+            # Mise à jour de la classe dans le fichier metadata.csv
+            old_label = df[df["UID"] == image_uid]["Classe"]
+            logger.debug(f"Ancien Label {old_label}")
+            logger.debug(f"Ancien répertoire {rep}")
+            df[df["UID"] == image_uid]["Classe"] = label
+            df[df["UID"] == image_uid]["Sous-répertoire SOURCE"] = new_rep
+            df[df["UID"] == image_uid]["Sous-répertoire CIBLE"] = new_rep
+            new_label = df[df["UID"] == image_uid]["Classe"]
+            new_rep = df[df["UID"] == image_uid]["Sous-répertoire CIBLE"]
+            logger.debug(f"Nouveau Label {new_label}")
+            logger.debug(f"Nouveau répertoire {new_rep}")
+
+            logger.debug(
+                f"Mise à jour du metadat.csv du dataset (Sans créer une nouvelle version)")
+            df.to_csv(metadata_path, index=False)
+    return "OK"
+
+
 # FONCTIONS UTILES
 
 

@@ -3,7 +3,7 @@ Créé le 14/08/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
 @summary: Page pour le déploiement d'un modèle
-Affichage de la liste de tous les modèles disponibles sur MLFlow 
+Affichage de la liste de tous les modèles disponibles sur MLFlow
 Sélection du modèle à déployer
 '''
 
@@ -23,21 +23,21 @@ def main(title):
 
     st.subheader("Liste des modèles")
 
-    list_models, runs_info = utils_streamlit.admin_get_models()
+    list_models = utils_streamlit.admin_get_models()
     print(f"list_models {list_models}")
-    print(f"runs_info {runs_info}")
-    df = pd.DataFrame(list_models)
-    print(f"df {df}")
+    df_m = pd.DataFrame(list_models)
+    print(f"df_m {df_m}")
     # df_m = df.drop(['Confusion Matrix', 'Classification Report'], axis=1)
-    df_r = pd.DataFrame(runs_info)
-    print(f"df_r {df_r}")
-    merged_df = pd.merge(df, df_r, on='RUN', suffixes=('', ''))
+    # df_r = pd.DataFrame(runs_info)
+    # print(f"df_r {df_r}")
+    # merged_df = pd.merge(df, df_r, on='RUN_ID', suffixes=('', ''))
 
-    sorted_df = merged_df.sort_values(
+    sorted_df = df_m.sort_values(
         by=['Phase', 'Date de création'], ascending=[False, False])
-    sorted_df_table = merged_df.drop(
-        columns=['RUN', 'PARAMS', 'Etat', 'STATUS'])
-    st.dataframe(sorted_df_table.reset_index(drop=True), hide_index=True)
+    st.dataframe(sorted_df.reset_index(drop=True), hide_index=True)
+    # sorted_df_table = merged_df.drop(
+    #    columns = ['RUN_ID', 'PARAMS', 'Etat', 'STATUS'])
+    # st.dataframe(sorted_df_table.reset_index(drop=True), hide_index=True)
 
     # Tab Version
     # Tab title = Model Name
@@ -85,8 +85,9 @@ def main(title):
                     "Value": [params['Accuracy'], params['F1-score'], params['Loss'], params['Recall']]
                 }
                 '''
-
+                '''
                 st.subheader("Matrice de confusion")
+                
                 df_confusion_matrix = df["Confusion Matrix"]
                 fig, ax = plt.subplots(figsize=(10, 7))
                 sns.heatmap(df_confusion_matrix, annot=True,
@@ -101,3 +102,4 @@ def main(title):
                 # Display the DataFrame as a table in Streamlit
                 st.dataframe(df_classification_report.reset_index(
                     drop=True), hide_index=True)
+                '''

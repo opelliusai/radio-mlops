@@ -21,8 +21,11 @@ def main(title):
              "Entrainement complet", "Réentrainement (avec les données de production)"])
 
     list_datasets = utils_streamlit.admin_get_datasets()
+    '''
     list_prod_datasets = utils_streamlit.admin_get_prod_datasets()
-
+    if list_prod_datasets is None:
+        st.warning("Aucun dataset de prod disponible")
+    '''
     dataset_names = [item['Dataset Name'] for item in list_datasets]
     dataset_names.sort()
     selected_dataset = st.selectbox('Sélection du Dataset', dataset_names)
@@ -43,9 +46,11 @@ def main(title):
         st.write(f"Max Epochs: {max_epochs}")
         st.write(f"Number of Trials: {num_trials}")
         # Lancer l'entrainement du modèle
-        run_id, model_name, model_version = utils_streamlit.admin_train_model(
+        run_id, model_name, model_version, experiment_link = utils_streamlit.admin_train_model(
             selected_dataset, int(max_epochs), int(num_trials))
 
-        st.write("RUN ID: {run_id}")
-        st.write("Model name: {model_name}")
-        st.write("Model version: {model_version}")
+        st.write(f"RUN ID: {run_id}")
+        st.write(f"Model name: {model_name}")
+        st.write(f"Model version: {model_version}")
+        st.write(f"Lien vers le RUN de l'entrainement {experiment_link}")
+        st.markdown(experiment_link)

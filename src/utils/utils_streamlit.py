@@ -28,6 +28,10 @@ API_URL_LOG_PREDICTION = API_URL + user_api_info["LOG_PREDICTION"]
 logger.debug(f"API_FULL_URL_LOG_PREDICTION : {API_URL_LOG_PREDICTION}")
 API_URL_ADD_IMAGE = API_URL + user_api_info["ADD_IMAGE"]
 logger.debug(f"API_URL_ADD_IMAGE : {API_URL_ADD_IMAGE}")
+API_URL_GET_UNLABELED_IMAGE = API_URL + user_api_info["GET_UNLABELED_IMAGE"]
+logger.debug(f"GET_UNLABELED_IMAGE : {API_URL_GET_UNLABELED_IMAGE}")
+API_URL_UPDATE_IMAGE = API_URL + user_api_info["UPDATE_IMAGE"]
+logger.debug(f"API_URL_UPDATE_IMAGE : {API_URL_UPDATE_IMAGE}")
 API_URL_LOGIN = API_URL + user_api_info["LOGIN"]
 logger.debug(f"API_FULL_URL_LOGIN : {API_URL_LOGIN}")
 
@@ -128,6 +132,44 @@ def ajout_image(image_path, label):
         return None
 
 
+def get_unlabeled_image():
+    logger.debug(
+        f"----get_unlabeled_image()---")
+    logger.debug(f"get_unlabeled_image_url = {API_URL_GET_UNLABELED_IMAGE}")
+
+    response = requests.get(API_URL_GET_UNLABELED_IMAGE)
+
+    if response.status_code == 200:
+        status = response.json().get("status")
+        image_uid = response.json().get("image_uid")
+        image_name = response.json().get("image_name")
+        image_path = response.json().get("image_path")
+        return status, image_uid, image_name, image_path
+    else:
+        print(f"Erreur : {response.status_code} - {response.json()}")
+        return None
+
+
+def update_image_label(image_uid, label):
+    logger.debug(
+        f"----ajout_image_dataset(image_uid={image_uid},label={label})---")
+    logger.debug(f"update_image_url = {API_URL_UPDATE_IMAGE}")
+    data = {
+        "image_uid": image_uid,
+        "label": label
+    }
+
+    logger.debug(f"data {data}")
+    response = requests.post(API_URL_UPDATE_IMAGE, params=data)
+
+    if response.status_code == 200:
+        status = response.json().get("status")
+        return status
+    else:
+        print(f"Erreur : {response.status_code} - {response.json()}")
+        return None
+
+
 # Utils ADMIN
 
 def admin_get_datasets():
@@ -183,8 +225,9 @@ def admin_train_model(dataset_version, max_epochs, num_trials):
     if response.status_code == 200:
         run_id = response.json().get("run_id")
         model_name = response.json().get("model_name")
-        model_version = response.json.get("model_version")
-        return run_id, model_name, model_version
+        model_version = response.json().get("model_version")
+        experiment_link = response.json().get("experiment_link")
+        return run_id, model_name, model_version, experiment_link
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None
@@ -199,8 +242,7 @@ def admin_get_models():
 
     if response.status_code == 200:
         list_models = response.json().get('list_models')
-        runs_info = response.json().get('runs_info')
-        return list_models, runs_info
+        return list_models
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None
@@ -276,6 +318,7 @@ def admin_ajout_images(images_labels):
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None
+
 
 # Monitoring
 

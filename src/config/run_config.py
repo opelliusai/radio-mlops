@@ -120,6 +120,8 @@ user_api_info = {
     "PREDICT_URL": "/predict",
     "LOG_PREDICTION": "/update_log_prediction",
     "ADD_IMAGE": "/add_image",
+    "GET_UNLABELED_IMAGE": "/get_unlabeled_image",
+    "UPDATE_IMAGE": "/update_image_label",
     "LOGIN": "/login"
 }
 

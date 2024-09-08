@@ -5,7 +5,7 @@ Créé le 07/08/2024
 @summary:API d'administration
 -- Etend l'API utilisateur avec des fonctionnalités d'administration
 -- Gestion des datasets: téléchargement, nettoyage, mise à jour
--- Modèles: Entrainement, réentrainement, 
+-- Modèles: Entrainement, réentrainement,
 déploiement ou préparation au déploiement
 '''
 
@@ -155,7 +155,7 @@ def train_model(retrain: bool = False,
     - Réentrainement d'un modèle
         - Avec les données de production
 
-    2. Version du dataset de Référence: 
+    2. Version du dataset de Référence:
         - Par défaut : Dernière version du Dataset
         - Version du dataset = Nom complet du dataset (basé sur le menu déroulant proposé)
 
@@ -168,14 +168,15 @@ def train_model(retrain: bool = False,
     """
     # run_id, model_name, model_version = model_tracking.main(
     # dataset_version, max_epochs, num_trials,)
-    run_id, model_name, model_version = model_tracking.main(
+    run_id, model_name, model_version, experiment_link = model_tracking.main(
         retrain, model_name, model_version, include_prod_data,
         balance, dataset_version, max_epochs, num_trials)
     return JSONResponse(status_code=200,
                         content={"status": "Entrainement terminé",
                                  "run_id": run_id,
                                  "model_name": model_name,
-                                 "model_version": model_version})
+                                 "model_version": model_version,
+                                 "experiment_link": experiment_link})
 
 
 # Mise à jour du tag d'un modèle pour le rendre prêt à être déployé
@@ -218,19 +219,19 @@ def force_model(num_version: str):
          summary="Liste tous les modèles disponibles",
          description="Liste tous les modèles disponibles")
 def get_models_list():
-    list_models, runs_info = utils_models.get_models()
+    list_models = utils_models.get_models()
+    logger.debug(f"API ADMIN list_models {list_models}")
 
     return JSONResponse(status_code=200,
-                        ontent={"status": "OK",
-                                "list_models": list_models,
-                                "runs_info": runs_info})
+                        content={"status": "OK",
+                                 "list_models": list_models})
 
 # Liste et informations sur les runs MLFlow
 
 
-@app.post("/get_runs_info",
-          summary="Récupérer les informations sur un ou plusieurs run",
-          description="Récupérer les informations des RUNs MLFlow")
+@ app.post("/get_runs_info",
+           summary="Récupérer les informations sur un ou plusieurs run",
+           description="Récupérer les informations des RUNs MLFlow")
 def get_runs_info(run_ids: list):
     runs_info = utils_models.get_runs_info(run_ids)
     return JSONResponse(status_code=200,
@@ -239,11 +240,12 @@ def get_runs_info(run_ids: list):
 # Liste et informations sur les datasets disponibles
 
 
-@app.post("/get_datasets_list",
-          summary="Lister les datasets disponibles",
-          description="Lister les datasets disponibles")
+@ app.post("/get_datasets_list",
+           summary="Lister les datasets disponibles",
+           description="Lister les datasets disponibles")
 def get_datasets_list(type: str = "REF"):
     list_datasets = utils_data.get_all_dataset_info(type)
+    logger.debug(f"list_datasets {list_datasets}")
     data = list_datasets.to_dict(orient='records')
 
     return JSONResponse(status_code=200,
@@ -254,7 +256,7 @@ def get_datasets_list(type: str = "REF"):
 # Utile pour l'administrateur pour charger un lot de données externes
 
 
-@app.post("/add_images", summary="", description="")
+@ app.post("/add_images", summary="", description="")
 async def add_images(images_labels: list):  # dict chemin/label
     ds_old_version, ds_new_version = update_dataset.add_mutliple_images(
         images_labels)

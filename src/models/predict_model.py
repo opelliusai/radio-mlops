@@ -40,7 +40,6 @@ client = MlflowClient(
 
 mlflow.set_tracking_uri(mlflow_uri)
 mlflow.set_registry_uri(mlflow_uri)
-
 # Model evaluation function
 
 

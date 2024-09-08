@@ -45,7 +45,6 @@ client = MlflowClient(
 
 mlflow.set_tracking_uri(mlflow_uri)
 mlflow.set_registry_uri(mlflow_uri)
-
 # Fonctions
 
 # Sauvegarder les predictions
@@ -536,7 +535,10 @@ def get_models(model_name=model_info["model_name_prefix"]):
     i = 1
     runs_info = []
     for model in model_versions:
+
         run_info = get_run_info(model.run_id)
+        experiment_id = run_info.get('EXPERIMENT_ID')
+        logger.debug(f"Experiment ID {experiment_id}")
         logger.debug(f"run_info {run_info}")
         logger.debug(f"RUN STATUS {run_info.get('STATUS')}")
         # if run_info.status
@@ -555,24 +557,41 @@ def get_models(model_name=model_info["model_name_prefix"]):
             model_info["Date de création"] = formatted_date
             model_info["Etat"] = model.status
             model_info["Phase"] = model.current_stage
-            model_info["RUN"] = model.run_id
+            model_info["RUN_ID"] = model.run_id
+            model_info["EXPERIMENT_ID"] = experiment_id
+            model_info["PARAMS"] = run_info["PARAMS"]
+            model_info["Durée"] = run_info["Durée"]
+            model_info["Link"] = get_mlflow_link(
+                model_info["EXPERIMENT_ID"], model_info["RUN_ID"])
+            '''
             model_info["Confusion Matrix"] = get_confusion_matrix_from_run(
                 model.run_id)
+            
             model_info["Classification Report"] = get_classification_report_from_run(
                 model.run_id)
+            '''
             models_info.append(model_info)
+    logger.debug(f"Model infos {models_info}")
+    logger.debug(f"RUN infos {runs_info}")
+    logger.debug(f"Type Model infos {type(models_info)}")
+    logger.debug(f"Type RUN infos {type(runs_info)}")
 
     # runs_info = get_runs_info(model_info["RUN"] for model_info in models_info)
-    return models_info, runs_info
+    return models_info
+
+
+def get_mlflow_link(experiment_id, run_id):
+    experiment_link = f"{mlflow_uri}/#/experiments/{experiment_id}/runs/{run_id}"
+    return experiment_link
 
 
 def get_run_info(run_id):
     logger.debug(f"-----------get_run_info(run_id={run_id})-------")
     run = client.get_run(run_id=run_id)
     run_info = {}
-    run_info["RUN"] = run.info.run_id
+    run_info["RUN_ID"] = run.info.run_id
     # run_info["Nom"]=run.info.run_name
-    # run_info["EXP"]=run.info.experiment_id
+    run_info["EXPERIMENT_ID"] = run.info.experiment_id
     run_info["PARAMS"] = run.data.params
     # run_info["ARTIFACTS"]=run.info.artifact_uri
     # run_info["metrics"]=run.data.metrics

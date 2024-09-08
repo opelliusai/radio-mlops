@@ -312,6 +312,27 @@ def copy_directory(src, dst):
         else:
             shutil.copy2(s, d)
 
+
+def move_directory(src, dst):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            move_directory(s, d)
+        else:
+            shutil.move(s, d)
+
+
+def move_file(src, dst):
+    # Create the destination directory if it doesn't exist
+    dst_dir = os.path.dirname(dst)
+    if not os.path.exists(dst_dir):
+        os.makedirs(dst_dir)
+
+    # Move the file
+    shutil.move(src, dst)
 # Dataset history management
 
 
@@ -848,3 +869,43 @@ def get_total_size(dataset_path):
             file_path = os.path.join(root, file)
             total_size += os.path.getsize(file_path)
     return total_size
+
+
+def get_unlabeled_image():
+    """
+    Fournir les informations sur une image non labellisée pour contribution
+    """
+    current_prod_dataset = get_latest_dataset_info("PROD")
+    if current_prod_dataset is None:
+        logger.error("Aucun Dataset de PROD trouvé.")
+        return "Aucun Dataset de PROD trouvé.", None, None, None
+    else:
+        dataset_path = current_prod_dataset["Chemin du Dataset"]
+        logger.debug(f"dataset_path {dataset_path}")
+        metadata_path = os.path.join(dataset_path, "metadata.csv")
+        logger.debug(f"metadata_path {metadata_path}")
+        # Lecture du dataset pour trouver le chemin de l'image
+        df = pd.read_csv(metadata_path)
+        # Filtrer les images non labellisées
+        df = df[df["Classe"] == "UNLABELED"]
+        # Sélectionner une image au hasard
+        if df is None:
+            return "Aucune image non labellisée trouvée.", None, None, None
+        else:
+            # Sélectionner une image au hasard
+            random_image = df.sample(1)
+            # Récupérer son UID
+            image_uid = random_image["UID"].values[0]
+            # Récupérer le chemin de l'image
+            image_path = random_image["Sous-répertoire CIBLE"].values[0]
+            # Récupérer le nom de l'image
+            image_name = random_image["Nom de fichier"].values[0]
+            # Construire le chemin complet
+            logger.debug(f"image_uid {image_uid}")
+            logger.debug(f"image_name {image_name}")
+            logger.debug(f"image_path   {image_path}")
+            full_image_path = os.path.join(
+                dataset_path, image_path, image_name)
+
+            logger.debug(f"full_image_path {full_image_path}")
+            return "OK", image_uid, image_name, full_image_path

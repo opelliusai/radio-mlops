@@ -341,6 +341,27 @@ async def add_image(image_path: str, label: str):
     status = update_dataset.add_one_image(image_path, label)
     return JSONResponse(status_code=200, content={"status": status})
 
+# Fournir une image non labellisée du Dataset de PROD
+
+
+@app.get("/get_unlabeled_image", summary="", description="")
+async def update_image_label():
+    status, image_uid, image_name, image_path = utils_data.get_unlabeled_image()
+    return JSONResponse(status_code=200, content={"status": status,
+                                                  "image_uid": image_uid,
+                                                  "image_name": image_name,
+                                                  "image_path": image_path
+                                                  })
+
+
+# Mise à jour de la classe d'une image (après contribution)
+
+
+@app.post("/update_image_label", summary="", description="")
+async def update_image_label(image_uid: str, label: str):
+    status = update_dataset.update_image(image_uid, label)
+    return JSONResponse(status_code=200, content={"status": status})
+
 # Liste des classes
 
 

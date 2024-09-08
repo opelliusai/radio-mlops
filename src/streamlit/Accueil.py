@@ -1,6 +1,6 @@
 import streamlit as st
 from src.utils import utils_streamlit
-from src.streamlit.st_pages import p_predict, p_services, p_performance, p_evaluation, p_training, p_deployment, p_datasets, tests
+from src.streamlit.st_pages import p_predict, p_contribution, p_services, p_performance, p_evaluation, p_training, p_deployment, p_datasets, tests
 
 # Titre du menu latéral
 st.sidebar.title("Analyse de radiographies pulmonaires")
@@ -69,6 +69,8 @@ def main():
             if uploaded_file is not None:
                 st.session_state.uploaded_file = uploaded_file
             p_predict.main(page, st.session_state.uploaded_file)
+        elif page == "Contribution":
+            p_contribution.main(page)
         elif page == "Etat des services" and st.session_state.user_role == 'admin':
             p_services.main(page)
         elif page == "Performance du modèle de Production" and st.session_state.user_role == 'admin':
@@ -101,6 +103,7 @@ def get_menu_list(user_role):
         # Pages pour l'utilisateur
         app_pages = ["Mon compte",
                      "Prédictions",
+                     "Contribution",
                      "Tests"]
 
     return app_pages

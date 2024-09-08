@@ -204,7 +204,7 @@ def model_tracking(dataset_infos, balance=True,
             # client.create_registered_model(
             #    name=init_model_name, description=model_info["model_desc"])
         """
-        return new_model_info.run_id, new_model_info.name, new_model_info.version
+        return new_model_info.run_id, new_model_info.name, new_model_info.version, experiment_id
 
 
 def model_retrain(model, dataset_path,
@@ -364,7 +364,7 @@ def model_retrain(model, dataset_path,
             f"Model version {client.get_latest_versions(model_name)[0].version}")
         # Ajout
         logger.debug(f"Enregistrement terminé")
-        return run_id, model_name, client.get_latest_versions(model_name)[0].version
+        return run_id, model_name, client.get_latest_versions(model_name)[0].version, experiment_id
 
 
 def main(retrain=False,
@@ -402,13 +402,13 @@ def main(retrain=False,
         if dataset_prod_infos is None:
             logger.error(f"Aucun Dataset de production trouvé")
         dataset_path_prod = dataset_prod_infos["Chemin du Dataset"]
-        run_id, model_name, model_version = model_retrain(model, dataset_path_prod,
-                                                          model_name,
-                                                          model_version,
-                                                          max_epochs=model_hp["max_epochs"],
-                                                          num_trials=model_hp["num_trials"],
-                                                          experiment_name="Model Retraining"
-                                                          )
+        run_id, model_name, model_version, experiment_id = model_retrain(model, dataset_path_prod,
+                                                                         model_name,
+                                                                         model_version,
+                                                                         max_epochs=model_hp["max_epochs"],
+                                                                         num_trials=model_hp["num_trials"],
+                                                                         experiment_name="Model Retraining"
+                                                                         )
     else:
         if dataset_version is None:
             logger.debug(
@@ -440,12 +440,14 @@ def main(retrain=False,
             logger.debug(f"Ne pas inclure data de PROD")
         # SCENARIO 2 ici - Entrainement modèle from scratch / Avec ou sans données de PROD, sur la version définie
 
-        run_id, model_name, model_version = model_tracking(
+        run_id, model_name, model_version, experiment_id = model_tracking(
             dataset_infos, balance, max_epochs, num_trials)
     logger.info("Fin du processus")
     logger.debug(
         f"run_id {run_id} / model_name {model_name} / model_version {model_version}")
-    return run_id, model_name, model_version
+    experiment_link = utils_models.get_mlflow_link(experiment_id, run_id)
+
+    return run_id, model_name, model_version, experiment_link
 
 
 def DELETE_main_init(dataset_version=None,
