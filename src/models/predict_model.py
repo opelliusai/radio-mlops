@@ -122,7 +122,7 @@ def predict_and_log(model, model_name, image_path, prediction_logging_filepath, 
     return prediction, confiance, temps_prediction
 
 
-def mlflow_predict_and_log(image_path, log=True):
+def mlflow_predict_and_log(image_path, username, log=True):
     logger.debug(
         f"------------mlflow_predict_and_log(image_path={image_path})----------")
 
@@ -163,7 +163,7 @@ def mlflow_predict_and_log(image_path, log=True):
     if log == True:
         # Logguer uniquement quand c'est utilisé en production
         pred_id = utils_models.save_prediction(f"{model_name}_v{production_version}", image_path,
-                                               prediction, confiance, temps_prediction, date_prediction)
+                                               prediction, confiance, temps_prediction, date_prediction, username)
     return f"{model_name}-V{production_version}", prediction, confiance, temps_prediction, pred_id
 
 

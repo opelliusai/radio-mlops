@@ -32,7 +32,7 @@ from src.config.log_config import setup_logging
 logger = setup_logging("STREAMLIT_USER")
 
 
-def main(title, uploaded_file=None):
+def main(title):
     # Affichage du titre
     st.title("Détection d'une anomalie Pulmonaire")
     # Configuration de 2 colonnes : Upload d'une prédiction et affichage du résultat
@@ -40,9 +40,8 @@ def main(title, uploaded_file=None):
 
     # COLUMN 1
     with col_upload:
-        if uploaded_file is None:
-            uploaded_file = st.file_uploader(
-                "Choisissez une image de Radiologie Pulmonaire...", type=["jpg", "jpeg", "png"])
+        uploaded_file = st.file_uploader(
+            "Choisissez une image de Radiologie Pulmonaire...", type=["jpg", "jpeg", "png"])
 
         if uploaded_file:
             logger.debug(f"Type de Fichier {type(uploaded_file)}")
@@ -56,7 +55,7 @@ def main(title, uploaded_file=None):
                 file_like = BytesIO(uploaded_file.read())
                 filename = uploaded_file.name
                 model_name, prediction, confiance, temps_prediction, image_upload_path, pred_id = utils_streamlit.lancer_une_prediction(
-                    file_like, filename)
+                    file_like, filename, st.session_state.username)
                 st.session_state.prediction = prediction
                 st.session_state.confiance = confiance
                 st.session_state.temps_prediction = temps_prediction
@@ -72,7 +71,7 @@ def main(title, uploaded_file=None):
                 if st.button("Valider", on_click=on_button_click):
                     print("Valider button clicked")
                     status_ajout_image = utils_streamlit.ajout_image(
-                        st.session_state.image_upload_path, st.session_state.prediction)
+                        st.session_state.image_upload_path, st.session_state.pred_id, st.session_state.prediction)
                     status_log_prediction = utils_streamlit.admin_log_prediction(
                         st.session_state.pred_id, st.session_state.prediction)
                     if status_ajout_image == "OK" and status_log_prediction == "OK":
@@ -87,7 +86,7 @@ def main(title, uploaded_file=None):
                 if st.button("Je ne sais pas", on_click=on_button_click):
                     print("Je ne sais pas button clicked")
                     utils_streamlit.ajout_image(
-                        st.session_state.image_upload_path, "UNLABELED")
+                        st.session_state.image_upload_path, st.session_state.pred_id, "UNLABELED")
                     uploaded_file = None
                     st.success(
                         "La reconnaissance n'a pas été validée sans proposition!")
@@ -99,7 +98,7 @@ def main(title, uploaded_file=None):
                 print("Soumettre button clicked")
                 print(f"Proposition {proposition}")
                 utils_streamlit.ajout_image(
-                    st.session_state.image_upload_path, proposition)
+                    st.session_state.image_upload_path, st.session_state.pred_id, proposition)
                 utils_streamlit.admin_log_prediction(
                     st.session_state.pred_id, proposition)
                 st.success("La proposition a été validée !")

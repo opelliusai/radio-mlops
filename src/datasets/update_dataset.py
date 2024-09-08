@@ -16,7 +16,7 @@ import pandas as pd
 import uuid
 import shutil
 # Imports internes
-from src.utils import utils_data
+from src.utils import utils_data, utils_models
 from src.config.run_config import init_paths, dataset_info
 from src.config.log_config import setup_logging
 # Redirection vers le fichier de log radio-mlops_datasets.log
@@ -106,7 +106,7 @@ def update_dataset_ref(update_dataset_path, source_type="KAGGLE", base_dataset_i
 # 2 - Ajout d'une image labellisée dans le Dataset de PROD (Image labellisée Après prédiction)
 
 
-def add_one_image(image_path, label="UNLABELED"):
+def add_one_image(image_path, pred_id, label="UNLABELED"):
     """
     Ajoute une nouvelle image à un ensemble de données existant et met à jour les métadonnées associées.
     Ces données sont stockées dans le DATASET de PROD
@@ -116,13 +116,15 @@ def add_one_image(image_path, label="UNLABELED"):
     :param label: Le label associé à l'image. Par défaut "UNLABELED".
     :type label: str
 
+    :param pred_id: Id de prediction associé à l'ajout,
+
     :raises Exception: En cas d'erreur non gérée.
 
     :return: "OK" si l'opération est réussie.
     :rtype: str
     """
     logger.debug(
-        f"add_one_image(image_path={image_path},label={label})")
+        f"add_one_image(image_path={image_path},pred_id = {pred_id},label={label})")
 
     current_prod_dataset = utils_data.get_latest_dataset_info("PROD")
     # Créer un nouveau répertoire s'il n'existe pas
@@ -157,8 +159,10 @@ def add_one_image(image_path, label="UNLABELED"):
     # Mise à jour du fichier metadata.csv
     taille_image = utils_data.get_file_size(image_path)
     logger.debug(f"Mise à jour du fichier metadata.csv")
+    logger.debug(
+        f"dataset_path={dataset_path}, dataset_uid={dataset_uid}, label={label}, os.path.basename(image_path)={os.path.basename(image_path)}, taille_image={taille_image}, pred_id={pred_id})")
     utils_data.update_metadata_prod(
-        dataset_path, dataset_uid, label, os.path.basename(image_path), taille_image)
+        dataset_path, dataset_uid, pred_id, os.path.basename(image_path), taille_image, label)
 
     dataset_infos = {
         "UID": dataset_uid,
@@ -185,12 +189,16 @@ def add_one_image(image_path, label="UNLABELED"):
 # Mise à jour du label d'une image
 
 
-def update_image(image_uid, label):
+def update_image(image_uid, pred_id, label):
     """
     Mise à jour du label et met à jour les métadonnées associées.
     Ces données sont stockées dans le DATASET de PROD
     :param image_uid: Le chemin de l'image à ajouter.
     :type image_uid: str
+
+
+    :param pred_id: L'ID de la prédiction'
+    :type pred_id: str
 
     :param label: Le label proposé à l'image.
     :type label: str
@@ -201,7 +209,7 @@ def update_image(image_uid, label):
     :rtype: str
     """
     logger.debug(
-        f"update_image(image_path={update_image},label={label})")
+        f"update_image(image_path={update_image},pred_id={pred_id},label={label})")
 
     current_prod_dataset = utils_data.get_latest_dataset_info("PROD")
     if current_prod_dataset is None:
@@ -227,22 +235,23 @@ def update_image(image_uid, label):
                 "Déplacement de l'image du répertoire {rep} à {new_rep}")
             utils_data.move_file(chemin_image, chemin_cible)
             # Mise à jour de la classe dans le fichier metadata.csv
-            old_label = df[df["UID"] == image_uid]["Classe"]
+            old_label = df.loc[df["UID"] == image_uid, "Classe"]
             logger.debug(f"Ancien Label {old_label}")
             logger.debug(f"Ancien répertoire {rep}")
-            df[df["UID"] == image_uid]["Classe"] = label
-            df[df["UID"] == image_uid]["Sous-répertoire SOURCE"] = new_rep
-            df[df["UID"] == image_uid]["Sous-répertoire CIBLE"] = new_rep
-            new_label = df[df["UID"] == image_uid]["Classe"]
-            new_rep = df[df["UID"] == image_uid]["Sous-répertoire CIBLE"]
+            df.loc[df["UID"] == image_uid, "Classe"] = label
+            df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"] = new_rep
+            df.loc[df["UID"] == image_uid, "Sous-répertoire CIBLE"] = new_rep
+            new_label = df.loc[df["UID"] == image_uid, "Classe"]
+            new_rep = df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"]
             logger.debug(f"Nouveau Label {new_label}")
             logger.debug(f"Nouveau répertoire {new_rep}")
-
+            logger.debug(f"Nouveau DataFrame {df}")
             logger.debug(
-                f"Mise à jour du metadat.csv du dataset (Sans créer une nouvelle version)")
+                f"Mise à jour du metadata.csv du dataset (Sans créer une nouvelle version)")
             df.to_csv(metadata_path, index=False)
+            logger.debug(f"Mise à jour des logs de prediction")
+            utils_models.update_log_prediction(pred_id, label)
     return "OK"
-
 
 # FONCTIONS UTILES
 

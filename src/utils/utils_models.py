@@ -50,13 +50,13 @@ mlflow.set_registry_uri(mlflow_uri)
 # Sauvegarder les predictions
 
 
-def save_prediction(model_name, image_path, prediction, confiance, temps_prediction, date_prediction):
+def save_prediction(model_name, image_path, prediction, confiance, temps_prediction, date_prediction, username):
     '''
         Mise à jour du fichier de prediction avec les informations recueillies
         Et sauvegarde de l'image dans le dossier des images prédites
     '''
     logger.debug(
-        "-------save_prediction(model_name={model_name}, image_path={img_path}, prediction={prediction}, confiance={confiance}, temps_prediction={temps_prediction}, date_prediction={date_prediction}")
+        "-------save_prediction(model_name={model_name}, image_path={img_path}, prediction={prediction}, confiance={confiance}, temps_prediction={temps_prediction}, date_prediction={date_prediction},username={username}")
     unique_id = str(uuid.uuid4())
     # Créer un dictionnaire avec les informations
     log_exist, prediction_logging_filepath = utils_data.check_logging_exists(
@@ -77,7 +77,8 @@ def save_prediction(model_name, image_path, prediction, confiance, temps_predict
         'Temps de prédiction': temps_prediction,
         'Date de prédiction': date_prediction,
         'Prédiction validée': "N/A",
-        'Perf Prédiction': "N/A"
+        'Perf Prédiction': "N/A",
+        "Username": username
     }
     with open(prediction_logging_filepath, 'a', newline='') as f:
         writer = csv.writer(f)

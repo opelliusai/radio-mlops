@@ -285,9 +285,9 @@ def initialize_dataset(dataset_path, type="REF"):
         return None
 
 
-def update_metadata_prod(dataset_path, dataset_uid, label, filename, taille_image):
+def update_metadata_prod(dataset_path, dataset_uid, pred_id, filename, taille_image, label):
     logger.debug(
-        f"-----------update_metadata_prod(dataset_path={dataset_path},label={label},filename={filename})-----------")
+        f"-----------update_metadata_prod(dataset_path={dataset_path},dataset_uid={dataset_uid},label={label},filename={filename},taille_image={taille_image},pred_id={pred_id})-----------")
     # Ajout d'une ligne au fichier metadata.csv
     rep = remove_space_from_foldername(label)
     md5 = calcul_md5(os.path.join(dataset_path, rep, filename))
@@ -297,7 +297,7 @@ def update_metadata_prod(dataset_path, dataset_uid, label, filename, taille_imag
         writer = csv.writer(csvfile)
         UID = uuid.uuid4()
         writer.writerow(
-            [UID, dataset_uid, rep, rep, label, filename, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), md5, taille_image, convert_size(taille_image)])
+            [UID, dataset_uid, rep, rep, label, filename, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), md5, taille_image, convert_size(taille_image), pred_id])
     logger.debug("Ajout terminé")
 
 
@@ -696,7 +696,8 @@ def initialize_logging_file(type="REF"):
                        "Temps de prédiction",
                        "Date de prédiction",
                        "Prédiction validée",
-                       "Perf Prédiction"]
+                       "Perf Prédiction",
+                       "Username"]
     elif type.lower() == "drift":
         log_columns = ["UID",
                        "Nom du modèle",
@@ -745,7 +746,8 @@ def initialize_metadata_file(dataset_path, type="REF"):
                         "Date d'ajout",
                         "md5",
                         "Taille",
-                        "Taille formattée"
+                        "Taille formattée",
+                        "Pred ID"
                         ]
     elif type.lower() == "kaggle":
         meta_columns = ["UID",
@@ -878,7 +880,7 @@ def get_unlabeled_image():
     current_prod_dataset = get_latest_dataset_info("PROD")
     if current_prod_dataset is None:
         logger.error("Aucun Dataset de PROD trouvé.")
-        return "Aucun Dataset de PROD trouvé.", None, None, None
+        return "Aucun Dataset de PROD trouvé.", None, None, None, None
     else:
         dataset_path = current_prod_dataset["Chemin du Dataset"]
         logger.debug(f"dataset_path {dataset_path}")
@@ -890,7 +892,7 @@ def get_unlabeled_image():
         df = df[df["Classe"] == "UNLABELED"]
         # Sélectionner une image au hasard
         if df is None:
-            return "Aucune image non labellisée trouvée.", None, None, None
+            return "Aucune image non labellisée trouvée.", None, None, None, None
         else:
             # Sélectionner une image au hasard
             random_image = df.sample(1)
@@ -900,12 +902,15 @@ def get_unlabeled_image():
             image_path = random_image["Sous-répertoire CIBLE"].values[0]
             # Récupérer le nom de l'image
             image_name = random_image["Nom de fichier"].values[0]
+            pred_id = random_image["Pred ID"].values[0]
             # Construire le chemin complet
             logger.debug(f"image_uid {image_uid}")
             logger.debug(f"image_name {image_name}")
             logger.debug(f"image_path   {image_path}")
+            logger.debug(f"pred_id   {pred_id}")
+
             full_image_path = os.path.join(
                 dataset_path, image_path, image_name)
 
             logger.debug(f"full_image_path {full_image_path}")
-            return "OK", image_uid, image_name, full_image_path
+            return "OK", image_uid, image_name, full_image_path, pred_id

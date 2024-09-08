@@ -84,13 +84,13 @@ logger.debug(f"API_URL_DRIFT_METRICS : {API_URL_DRIFT_METRICS}")
 # Utils USER
 
 
-def lancer_une_prediction(file, filename):
+def lancer_une_prediction(file, filename, username):
     logger.debug(
-        f"-----------lancer_une_prediction(filename = {filename})----------")
+        f"-----------lancer_une_prediction(filename = {filename}, username = {username})----------")
     logger.debug(f"prediction_url = {API_URL_PREDICT}")
     files = {"image": (filename, file, "image/jpeg")}
-
-    response = requests.post(API_URL_PREDICT, files=files)
+    response = requests.post(API_URL_PREDICT, files=files, params={
+                             "username": username})
 
     if response.status_code == 200:
         model = response.json().get("model_name")
@@ -112,12 +112,13 @@ def lancer_une_prediction(file, filename):
         return None
 
 
-def ajout_image(image_path, label):
+def ajout_image(image_path, pred_id, label):
     logger.debug(
-        f"----ajout_image_dataset(image_path={image_path},label={label})---")
+        f"----ajout_image(image_path={image_path},pred_id={pred_id}label={label})---")
     logger.debug(f"add_image_url = {API_URL_ADD_IMAGE}")
     data = {
         "image_path": image_path,
+        "pred_id": pred_id,
         "label": label
     }
 
@@ -144,18 +145,20 @@ def get_unlabeled_image():
         image_uid = response.json().get("image_uid")
         image_name = response.json().get("image_name")
         image_path = response.json().get("image_path")
-        return status, image_uid, image_name, image_path
+        pred_id = response.json().get("pred_id")
+        return status, image_uid, image_name, image_path, pred_id
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None
 
 
-def update_image_label(image_uid, label):
+def update_image_label(image_uid, pred_id, label):
     logger.debug(
-        f"----ajout_image_dataset(image_uid={image_uid},label={label})---")
+        f"----ajout_image_dataset(image_uid={image_uid},pred_id={pred_id},label={label})---")
     logger.debug(f"update_image_url = {API_URL_UPDATE_IMAGE}")
     data = {
         "image_uid": image_uid,
+        "pred_id": pred_id,
         "label": label
     }
 

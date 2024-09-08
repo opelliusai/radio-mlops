@@ -310,9 +310,11 @@ def verify_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/token"))):
 
 
 @app.post("/predict", summary="Prédiction sur une image", description="Evaluation de l'état pulmonaire basé sur une image")
-async def predict(image: UploadFile = File(...)):
+async def predict(username: str,
+                  image: UploadFile = File(...)):
     # Temporairement sans authentification
     logger.debug("---------------user_api: /predict---------------")
+    logger.debug(f"Username {username}")
     image_original_name = image.filename
     # construction du nom du fichier basé sur la date courante
     logger.debug(f"Image reçue: {image_original_name}")
@@ -330,15 +332,17 @@ async def predict(image: UploadFile = File(...)):
         logger.debug(f"Image sauvegardée à: {image_path}")
     # Exécuter la prédiction
     model_name, prediction, confiance, temps_prediction, pred_id = mlflow_predict_and_log(
-        image_path)
+        image_path, username)
     return JSONResponse(status_code=200, content={"status": "OK", "model_name": model_name, "prediction": prediction, "confiance": confiance, "temps_prediction": temps_prediction, "image_upload_path": image_path, "pred_id": pred_id})
 
 # Ajout d'une image et de son label
 
 
 @app.post("/add_image", summary="", description="")
-async def add_image(image_path: str, label: str):
-    status = update_dataset.add_one_image(image_path, label)
+async def add_image(image_path: str, pred_id: str, label: str):
+    logger.debug(
+        f"api add_image(image_path={image_path}, pred_id ={pred_id}, label={label})")
+    status = update_dataset.add_one_image(image_path, pred_id, label)
     return JSONResponse(status_code=200, content={"status": status})
 
 # Fournir une image non labellisée du Dataset de PROD
@@ -346,11 +350,12 @@ async def add_image(image_path: str, label: str):
 
 @app.get("/get_unlabeled_image", summary="", description="")
 async def update_image_label():
-    status, image_uid, image_name, image_path = utils_data.get_unlabeled_image()
+    status, image_uid, image_name, image_path, pred_id = utils_data.get_unlabeled_image()
     return JSONResponse(status_code=200, content={"status": status,
                                                   "image_uid": image_uid,
                                                   "image_name": image_name,
-                                                  "image_path": image_path
+                                                  "image_path": image_path,
+                                                  "pred_id": pred_id
                                                   })
 
 
@@ -358,8 +363,8 @@ async def update_image_label():
 
 
 @app.post("/update_image_label", summary="", description="")
-async def update_image_label(image_uid: str, label: str):
-    status = update_dataset.update_image(image_uid, label)
+async def update_image_label(image_uid: str, label: str, pred_id: str):
+    status = update_dataset.update_image(image_uid, pred_id, label)
     return JSONResponse(status_code=200, content={"status": status})
 
 # Liste des classes
