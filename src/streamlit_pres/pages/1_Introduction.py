@@ -9,3 +9,9 @@ st.write("L'objectif initial du client était de prioriser la détection COVID p
 
 st.subheader("Contexte 2024")
 st.write("L'objectif actuel du client est de conserver un taux élevé de détection COVID, mais sans négliger d'autres pathologies, en particulier la Pneumonie Virale")
+
+st.subheader("Approche")
+st.write("- Exclure l'Opacité Pulmonaire")
+st.write("- Ne pas utiliser les masques")
+st.write("- 3 classes: COVID, Pneumonie Virale et Normale")
+st.write("- Equlibre entre la minimisation des faux negatifs COVID et la maximisation des vrais positifs Pneumonie Virale et Normal")
