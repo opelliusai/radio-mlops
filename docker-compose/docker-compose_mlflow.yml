@@ -3,8 +3,7 @@ services:
     build:
       context: ..
       dockerfile: docker-compose/Dockerfile_MLFlow
-      #image: mlflow:latest
-    container_name: mlflow_mlops
+    container_name: mlflow
     ports:
       - "8090:8090"
     volumes:
