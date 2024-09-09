@@ -17,8 +17,8 @@ logger = setup_logging("STREAMLIT_ADMIN")
 def main(title):
     st.header("Entrainement/Réentrainement d'un modèle")
 
-    st.radio("", [
-             "Entrainement complet", "Réentrainement (avec les données de production)"])
+    selection = st.radio("", [
+        "Entrainement complet (Données de Référence uniquement)", "Réentrainement (avec les données de production)", "Entrainement du modèle de Production avec les données de PROD"])
 
     list_datasets = utils_streamlit.admin_get_datasets()
     '''
@@ -46,11 +46,17 @@ def main(title):
         st.write(f"Max Epochs: {max_epochs}")
         st.write(f"Number of Trials: {num_trials}")
         # Lancer l'entrainement du modèle
-        run_id, model_name, model_version, experiment_link = utils_streamlit.admin_train_model(
-            selected_dataset, int(max_epochs), int(num_trials))
+        if selection == "Entrainement complet (Données de Référence uniquement)":
+            run_id, model_name, model_version, experiment_link = utils_streamlit.admin_train_model(
+                selected_dataset, int(max_epochs), int(num_trials), False, False)
+        elif selection == "Réentrainement (avec les données de production)":
+            run_id, model_name, model_version, experiment_link = utils_streamlit.admin_train_model(
+                selected_dataset, int(max_epochs), int(num_trials), True, False)
+        elif selection == "Entrainement du modèle de Production avec les données de PROD":
+            run_id, model_name, model_version, experiment_link = utils_streamlit.admin_train_model(
+                selected_dataset, int(max_epochs), int(num_trials), False, True)
 
         st.write(f"RUN ID: {run_id}")
         st.write(f"Model name: {model_name}")
         st.write(f"Model version: {model_version}")
         st.write(f"Lien vers le RUN de l'entrainement {experiment_link}")
-        st.markdown(experiment_link)

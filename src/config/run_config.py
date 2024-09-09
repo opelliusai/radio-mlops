@@ -24,6 +24,8 @@ init_paths = {
     "data_folder": "data",
     "archive_folder": "data/archives",
     "logs_folder": "logs",
+    "monitoring_log_folder": "logs/monitoring",
+
     "docs": "docs",
     "references": "references",
     "notebooks": "notebooks",
@@ -54,6 +56,8 @@ init_paths = {
     "PRED_images_folder": "data/raw/prediction_images",
     "PRED_logging_folder": "data/processed/predictions",
 
+    # Chemin Monitoring
+    "monitoring_execution_history":  "data/processed/monitoring_history",
     # Post deploiement - Drift
     "model_drift_folder": "data/processed/model_drift",
 
@@ -110,8 +114,11 @@ model_hp = {
 
 
 drift_info = {
-    "mean_threshold": 0.01,
-    "std_threshold": 0.05
+    #    "mean_threshold": 0.01,
+    #    "std_threshold": 0.05
+    "mean_threshold": 0.0001,
+    "std_threshold": 0.00005
+
 }
 
 user_api_info = {
@@ -147,9 +154,16 @@ monitoring_api_info = {
     "URLS_PREFIX": "http://localhost",
     "MONITORING_API_URL": "http://127.0.0.1:8083",
     # "MONITORING_API_URL": "http://monitoring_api:8083",
+    "DEPLOY_READY_MODEL": "/deploy_ready_model",
     "DRIFT_METRICS_URL": "/drift_metrics",
 }
 
+monitoring_info = {
+    "deploy_monitoring_history_filename": "deploy_monitoring_history.csv",
+    "healthcheck_monitoring_history_filename": "healthcheck_monitoring_history.csv",
+    "modeldrift_monitoring_history_filename": "modeldrift_monitoring_history.csv",
+    "global_monitoring_hisory_filename": "global_monitoring_history.csv",
+}
 
 user_mgt = {
     "user_filename": "streamlit_users.json"
@@ -161,4 +175,13 @@ infolog = {
     "project_name": "Covid19_MLOps",
     "logfile_name": "covid19-mlops.log",
     "logfile_prefix": "radio-mlops_",  # prefix pour le fichier de log par package src
+}
+
+urls_info = {
+    "USER_API_URL": "http://127.0.0.1:8081",
+    "ADMIN_API_URL": "http://127.0.0.1:8082",
+    "MONITORING_API_URL": "http://127.0.0.1:8083",
+    "STREAMLIT_URL": "http://127.0.0.1:8501",
+    "STREAMLIT_PRES_URL": "http://127.0.0.1:8502",
+    "MLFLOW_URL": "http://127.0.0.1:5001"
 }

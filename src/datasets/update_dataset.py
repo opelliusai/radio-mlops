@@ -223,7 +223,7 @@ def update_image(image_uid, pred_id, label):
         if image_row.empty:
             logger.error(f"Aucune image trouvée avec l'UID {image_uid}.")
         else:
-            rep = image_row["Sous-répertoire CIBLE"].values[0]
+            rep = image_row["Sous-répertoire"].values[0]
             new_rep = utils_data.remove_space_from_foldername(label)
             nom_image = image_row["Nom de fichier"].values[0]
             logger.debug(f"rep {rep}")
@@ -240,7 +240,7 @@ def update_image(image_uid, pred_id, label):
             logger.debug(f"Ancien répertoire {rep}")
             df.loc[df["UID"] == image_uid, "Classe"] = label
             df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"] = new_rep
-            df.loc[df["UID"] == image_uid, "Sous-répertoire CIBLE"] = new_rep
+            df.loc[df["UID"] == image_uid, "Sous-répertoire"] = new_rep
             new_label = df.loc[df["UID"] == image_uid, "Classe"]
             new_rep = df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"]
             logger.debug(f"Nouveau Label {new_label}")

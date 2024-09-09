@@ -1,0 +1,17 @@
+services:
+  cron:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_scripts
+    image: cron:latest
+    container_name: cron
+    #environment:
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/app/logs
+      - shared_data:/app/data
+volumes:
+  main_volume:
+  logs:
+  shared_data:
+  

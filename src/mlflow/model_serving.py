@@ -89,9 +89,6 @@ def auto_model_serving(model_name=model_info["model_name_prefix"]):
     # Récupérer tous les modèles enregistrés
     registered_models = client.search_registered_models()
 
-    # Liste pour stocker les modèles et versions prêts pour la production
-    models_production_ready = []
-
     # Parcourir chaque modèle enregistré
     for model in registered_models:
         if model.name.lower() == model_name.lower():

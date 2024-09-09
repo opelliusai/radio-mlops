@@ -101,7 +101,7 @@ def train_model(model, ml_hp, X, y, full_run_folder, model_training_history_csv)
         logger.debug(
             f"Type y_train {type(y_train)} / Len y_train {len(y_train)}")
         logger.debug(f"Type y_val {type(y_val)} / Len y_val {len(y_val)}")
-
+        logger.debug(f"Type model {type(model)}")
         history = model.fit(X_train, y_train, epochs=max_epochs, validation_data=(
             X_val, y_val), callbacks=[early_stopping, lr_scheduler, csv_logger])
         end_time = time.time()

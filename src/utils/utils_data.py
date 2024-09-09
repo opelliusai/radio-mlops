@@ -17,7 +17,7 @@ from datetime import datetime
 import os
 import hashlib
 import uuid
-from src.config.run_config import init_paths, dataset_info, model_info, current_dataset_label_correspondance
+from src.config.run_config import init_paths, dataset_info, model_info, current_dataset_label_correspondance, monitoring_info
 import csv
 from src.config.log_config import setup_logging
 import pandas as pd
@@ -631,6 +631,10 @@ def get_logging_path(type="REF"):
         logging_path = os.path.join(
             init_paths["main_path"], init_paths["model_drift_folder"], model_info["MODEL_DRIFT_logging_filename"])
         logger.debug(f"logging_path : {logging_path}")
+    elif type.lower() == "monitoring":
+        logging_path = os.path.join(
+            init_paths["main_path"], init_paths["monitoring_execution_history"], monitoring_info["global_monitoring_hisory_filename"])
+        logger.debug(f"logging_path : {logging_path}")
     else:
         logger.debug(f"Type de LOGGING {type} non reconnu")
         return None
@@ -711,6 +715,14 @@ def initialize_logging_file(type="REF"):
                        "Drift",
                        "Date de calcul",
                        "Temps de calcul"]
+    elif type.lower() == "monitoring":
+        log_columns = ["UID",
+                       "Type d'exécution",
+                       "Date d'exécution",
+                       "Temps d'exécution",
+                       "Status",
+                       "Détails"]
+
     else:
         logger.debug(f"Type de LOGGING {type} non reconnu")
         return None
@@ -739,8 +751,7 @@ def initialize_metadata_file(dataset_path, type="REF"):
     elif type.lower() == "prod":
         meta_columns = ["UID",
                         "Dataset UID",
-                        "Sous-répertoire SOURCE",
-                        "Sous-répertoire CIBLE",
+                        "Sous-répertoire",
                         "Classe",
                         "Nom de fichier",
                         "Date d'ajout",

@@ -32,21 +32,20 @@ def main(title):
     retrain = st.checkbox("Avec réentrainement en cas de drift")
 
     if st.button("Lancer un calcul de drift"):
+        status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link = utils_streamlit.lancer_drift_detection(
+            retrain)
+
         if retrain:
-            # If the checkbox is checked, execute the retraining function
-            status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, diff_run_id, diff_model_name, diff_model_version, comb_run_id, comb_model_name, comb_model_version = utils_streamlit.lancer_drift_detection_avec_reentrainement()
-            st.write('Infos réentrainement')
+            st.write('Infos réentrainement du modèle')
+            st.write(f"Statut: {status_retrain_diff}")
             data_train = {
-                'Type': ['Run ID', 'Model Name', 'Version'],
-                'DIFF': [diff_run_id, diff_model_name, diff_model_version],
-                'Combiné': [comb_run_id, comb_model_name, comb_model_version]
+                'Type': ['Run ID', 'Model Name', 'Version', "Lien Experiment"],
+                'DIFF': [diff_run_id, model_name, diff_model_version, diff_experiment_link],
+                'Combiné': [comb_run_id, model_name, comb_model_version, comb_experiment_link]
             }
             logger.debug(f"data_train {data_train}")
             df_train = pd.DataFrame(data_train)
             st.dataframe(df_train.reset_index(drop=True), hide_index=True)
-        else:
-            # If the checkbox is not checked, execute the normal drift calculation function
-            status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff = utils_streamlit.lancer_drift_detection()
 
         st.success("Calcul de Drift exécuté")
         data = {

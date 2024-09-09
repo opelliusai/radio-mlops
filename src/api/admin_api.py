@@ -191,16 +191,18 @@ def make_model_prod_ready(num_version):
                         content={"status": "Mise à jour terminée"})
 
 # Déploiement d'un modèle prêt pour la PRODUCTION
+# Dupliqué sur monitoring
 
 
 @app.post("/deploy_ready_model",
           summary="Déployer un modèle prêt pour la PROD",
           description="Déployer un modèle qui a un tag prêt pour la PROD")
 def deploy_ready_model():
-    model_serving.auto_model_serving()
+    model_name, model_version = model_serving.auto_model_serving()
     return JSONResponse(status_code=200,
-                        content={"status": "Déploiement en PROD terminé"})
-
+                        content={"status": "Déploiement en PROD terminé",
+                                 "model_name": model_name,
+                                 "model_version": model_version})
 # Forcer le déploiement d'un modèle en PRODUCTION
 
 

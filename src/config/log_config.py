@@ -17,18 +17,17 @@ from src.config.run_config import init_paths, infolog
 # FONCTION PRINCIPALE
 
 
-def setup_logging(logfile_label):
+def setup_logging(logfile_label, logging_path=init_paths["logs_folder"]):
     '''
     Logging setup, using run_config infolog information
     '''
     main_path = init_paths["main_path"]
-    log_folder = init_paths["logs_folder"]
     logfile_prefix = infolog["logfile_prefix"]
     logfile_name = f"{logfile_prefix}{logfile_label}.log"
-    logfile_path = os.path.join(main_path, log_folder, logfile_name)
+    logfile_path = os.path.join(main_path, logging_path, logfile_name)
 
     # Ensure the log folder exists
-    os.makedirs(os.path.join(main_path, log_folder), exist_ok=True)
+    os.makedirs(os.path.join(main_path, logging_path), exist_ok=True)
 
     # Create a formatter and handlers
     formatter = logging.Formatter(

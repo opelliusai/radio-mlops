@@ -47,8 +47,6 @@ API_URL_UPDATE_DATASET = API_ADMIN_URL + admin_api_info["UPDATE_DATASET_URL"]
 logger.debug(f"API_FULL_URL_UPDATE_DATASET : {API_URL_UPDATE_DATASET}")
 API_URL_TRAIN_MODEL = API_ADMIN_URL + admin_api_info["TRAIN_MODEL_URL"]
 logger.debug(f"API_FULL_URL_TRAIN_MODEL : {API_URL_TRAIN_MODEL}")
-API_URL_RETRAIN_MODEL = API_ADMIN_URL + admin_api_info["RETRAIN_MODEL_URL"]
-logger.debug(f"API_URL_RETRAIN_MODEL : {API_URL_RETRAIN_MODEL}")
 API_URL_MAKE_MODEL_PROD_READY = API_ADMIN_URL + \
     admin_api_info["MAKE_MODEL_PROD_READY_URL"]
 logger.debug(
@@ -208,7 +206,7 @@ def admin_get_prod_datasets():
         return None
 
 
-def admin_train_model(dataset_version, max_epochs, num_trials):
+def admin_train_model(dataset_version, max_epochs, num_trials, retrain=False, include_prod_data=False):
 
     logger.debug(
         "--admin_train_model(dataset_version,max_epochs,num_trials)--")
@@ -220,7 +218,9 @@ def admin_train_model(dataset_version, max_epochs, num_trials):
     data = {
         "dataset_version": dataset_version,
         "max_epochs": max_epochs,
-        "num_trials": num_trials
+        "num_trials": num_trials,
+        "retrain": retrain,
+        "include_prod_data": include_prod_data
     }
     logger.debug(f"data {data}")
     response = requests.post(API_URL_TRAIN_MODEL, params=data)
@@ -326,11 +326,14 @@ def admin_ajout_images(images_labels):
 # Monitoring
 
 
-def lancer_drift_detection():
+def lancer_drift_detection(retrain=False):
     logger.debug(f"----------------lancer_drift_detection()------------")
 
     logger.debug(f"drift_metrics_launch_url = {API_URL_DRIFT_METRICS}")
-    response = requests.get(API_URL_DRIFT_METRICS)
+    data = {
+        "retrain": retrain
+    }
+    response = requests.post(API_URL_DRIFT_METRICS, params=data)
 
     if response.status_code == 200:
         status = response.json().get("status")
@@ -342,6 +345,15 @@ def lancer_drift_detection():
         original_std = response.json().get('original_std')
         mean_diff = response.json().get('mean_diff')
         std_diff = response.json().get('std_diff')
+        status_retrain_diff = response.json().get('status_retrain_diff')
+        diff_run_id = response.json().get('diff_run_id')
+        diff_model_version = response.json().get('diff_model_version')
+        diff_experiment_link = response.json().get('diff_experiment_link')
+        status_retrain_comb = response.json().get('status_retrain_comb')
+        comb_run_id = response.json().get('comb_run_id')
+        comb_model_version = response.json().get('comb_model_version')
+        comb_experiment_link = response.json().get('comb_experiment_link')
+
         logger.debug(f"status = {status}")
         logger.debug(f"model_name = {model_name}")
         logger.debug(f"drift = {drift}")
@@ -351,7 +363,15 @@ def lancer_drift_detection():
         logger.debug(f"original_std = {original_std}")
         logger.debug(f"mean_diff = {mean_diff}")
         logger.debug(f"std_diff = {std_diff}")
-        return status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff
+        logger.debug(f"status_retrain_diff = {status_retrain_diff}")
+        logger.debug(f"diff_run_id = {diff_run_id}")
+        logger.debug(f"diff_model_version = {diff_model_version}")
+        logger.debug(f"diff_experiment_link = {diff_experiment_link}")
+        logger.debug(f"status_retrain_comb = {status_retrain_comb}")
+        logger.debug(f"comb_run_id = {comb_run_id}")
+        logger.debug(f"comb_model_version = {comb_model_version}")
+        logger.debug(f"comb_experiment_link = {comb_experiment_link}")
+        return status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link
 
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
@@ -363,6 +383,9 @@ def lancer_drift_detection_avec_reentrainement():
 
     logger.debug(f"drift_metrics_launch_url = {API_URL_DRIFT_METRICS}")
     response = requests.get(API_URL_DRIFT_METRICS)
+
+    # logger.debug(f"train_url = {API_URL_TRAIN_MODEL}")
+    # response = requests.get(API_URL_TRAIN_MODEL)
 
     if response.status_code == 200:
         status = response.json().get("status")
@@ -396,33 +419,6 @@ def lancer_drift_detection_avec_reentrainement():
         else:
             logger.debug("Pas de drift détecté - Pas de réentrainement")
         return status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, diff_run_id, diff_model_name, diff_model_version, comb_run_id, comb_model_name, comb_model_version
-    else:
-        print(f"Erreur : {response.status_code} - {response.json()}")
-        return None
-
-
-def admin_retrain_model(max_epochs, num_trials, option):
-
-    logger.debug(
-        f"---------admin_retrain_model(max_epochs,num_trials,option)------")
-
-    logger.debug(
-        f"-------admin_retrain_model({max_epochs},{num_trials}{option})---")
-    # Essayer de se connecter pour obtenir le token
-    logger.debug(f"retrain_url = {API_URL_RETRAIN_MODEL}")
-    data = {
-        "max_epochs": max_epochs,
-        "num_trials": num_trials,
-        "option": option
-    }
-    logger.debug(f"data {data}")
-    response = requests.post(API_URL_RETRAIN_MODEL, params=data)
-
-    if response.status_code == 200:
-        run_id = response.json().get("run_id")
-        model_name = response.json().get("model_name")
-        model_version = response.json.get("model_version")
-        return run_id, model_name, model_version
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None

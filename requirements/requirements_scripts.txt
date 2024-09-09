@@ -1,0 +1,4 @@
+auto_mix_prep==0.2.0
+pandas==2.2.2
+Requests==2.32.3
+streamlit==1.37.1

@@ -488,8 +488,10 @@ def get_mlflow_prod_model():
     model_version = get_mlflow_prod_version()
     logger.debug(
         f"Chargement du modèle de production {model_name}-{model_version}pour les predictions")
-    model = mlflow.pyfunc.load_model(
-        model_uri=f"models:/{model_name}/Production")
+    model_uri = f"models:/{model_name}/Production"
+    # model = mlflow.pyfunc.load_model(
+    #    model_uri=model_uri)
+    model = mlflow.tensorflow.load_model(model_uri=model_uri)
     logger.debug(f"Modele {model_name} chargé")
     return model, model_name, model_version
 
