@@ -1,0 +1,16 @@
+services:
+  user_api:
+    image: opelliusai/user_api:latest
+    container_name: user_api
+    #environment:
+    ports:
+      - "8081:8081"
+    volumes:
+      - main_volume:/app/volume_data
+      - logs:/var/log
+      - shared_data:/app/data
+volumes:
+  main_volume:
+  logs:
+  shared_data:
+  
