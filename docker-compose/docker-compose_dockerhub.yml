@@ -1,9 +1,6 @@
 services:
   user_api:
-    build:
-      context: ..
-      dockerfile: docker-compose/Dockerfile_user_api
-    image: user_api:latest
+    image: opelliusai/user_api:latest
     container_name: user_api
     ports:
       - "8081:8081"
@@ -12,10 +9,7 @@ services:
       - logs:/var/log
       - shared_data:/app/data
   admin_api:
-    build:
-      context: ..
-      dockerfile: docker-compose/Dockerfile_admin_api
-    image: admin_api:latest
+    image: opelliusai/admin_api:latest
     container_name: admin_api
     ports:
       - "8082:8082"
@@ -24,10 +18,7 @@ services:
       - logs:/var/log
       - shared_data:/app/data
   monitoring_api:
-    build:
-      context: ..
-      dockerfile: docker-compose/Dockerfile_monitoring_api
-    image: monitoring_api:latest
+    image: opelliusai/monitoring_api:latest
     container_name: monitoring_api
     ports:
       - "8083:8083"
@@ -36,10 +27,7 @@ services:
       - logs:/var/log
       - shared_data:/app/data
   mlflow:
-    build:
-      context: ..
-      dockerfile: docker-compose/Dockerfile_MLFlow
-    image: mlflow:latest
+    image: opelliusai/mlflow:latest
     container_name: mlflow
     ports:
       - "8090:8090"
@@ -47,10 +35,7 @@ services:
       - main_volume:/mlflow
       - shared_data:/app/data
   streamlit:
-    build:
-      context: ..
-      dockerfile: docker-compose/Dockerfile_streamlit
-    image: streamlit:latest
+    image: opelliusai/streamlit:latest
     container_name: streamlit
     ports:
       - "8084:8084"
@@ -59,10 +44,7 @@ services:
       - logs:/var/log
       - shared_data:/app/data
   streamlit_pres:
-    build:
-      context: ..
-      dockerfile: docker-compose/Dockerfile_streamlit_pres
-    image: streamlit_pres:latest
+    image: opelliusai/streamlit_pres:latest
     container_name: streamlit_pres
     ports:
       - "8085:8085"
