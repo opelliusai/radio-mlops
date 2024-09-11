@@ -70,6 +70,13 @@ services:
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ../data/prometheus_data/prometheus_dockers.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "8091:9090"
 volumes:
   main_volume:
   logs:

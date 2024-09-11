@@ -4,16 +4,16 @@ RUN apt-get update && apt-get install -y libhdf5-dev
 
 WORKDIR /app
 
-COPY requirements/requirements_streamlit.txt /app/requirements_streamlit.txt
+COPY ../requirements/requirements_streamlit.txt /app/requirements_streamlit.txt
 
 RUN mkdir src
 RUN mkdir src/streamlit
 
-COPY src/__init__.py /app/src
-COPY src/streamlit/Accueil.py /app/src/streamlit/Accueil.py
-COPY src/streamlit/st_pages /app/src/streamlit/st_pages
-COPY src/utils /app/src/utils
-COPY src/config /app/src/config
+COPY ../src/__init__.py /app/src
+COPY ../src/streamlit/Accueil.py /app/src/streamlit/Accueil.py
+COPY ../src/streamlit/st_pages /app/src/streamlit/st_pages
+COPY ../src/utils /app/src/utils
+COPY ../src/config /app/src/config
 
 
 RUN pip install -r requirements_streamlit.txt

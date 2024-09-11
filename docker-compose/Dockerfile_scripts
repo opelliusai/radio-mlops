@@ -20,10 +20,15 @@ COPY ../src/scripts /app/src/scripts
 
 RUN pip install -r requirements_scripts.txt
 
+#ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+ENV PYTHONPATH "/app/src:$PYTHONPATH"
+
+
 # Copier le fichier crontab et l'ajouter au cron
 COPY ../scripts/monitoring/crontab_docker /etc/cron.d/crontab
 RUN chmod 0644 /etc/cron.d/crontab
 
-ENV PYTHONPATH "${PYTHONPATH}:/app/src"
+
+
 # Démarrer cron et attendre que le fichier de log existe avant de lancer tail
 CMD python src/utils/utils_folders_init.py && service cron start && crontab /etc/cron.d/crontab && touch /app/data/cron.log && tail -f /app/data/cron.log

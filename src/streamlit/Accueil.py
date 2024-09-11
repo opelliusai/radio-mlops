@@ -1,6 +1,6 @@
 import streamlit as st
 from src.utils import utils_streamlit
-from src.streamlit.st_pages import p_predict, p_user_predictions, p_contribution, p_services, p_performance, p_evaluation, p_training, p_deployment, p_datasets, tests
+from src.streamlit.st_pages import p_predict, p_user_predictions, p_contribution, p_services, p_performance, p_evaluation, p_training, tests, p_models
 
 # Titre du menu latéral
 st.sidebar.title("Analyse de radiographies pulmonaires")
@@ -78,9 +78,7 @@ def main():
         elif page == "Entrainement/Réentrainement" and st.session_state.user_role == 'admin':
             p_training.main(page)
         elif page == "Informations et déploiement de modèles" and st.session_state.user_role == 'admin':
-            p_deployment.main(page)
-        elif page == "Based de données" and st.session_state.user_role == 'admin':
-            p_datasets.main(page)
+            p_models.main(page)
         elif page == "Tests":
             tests.main(page)
 
@@ -96,6 +94,7 @@ def get_menu_list(user_role):
                      "Performance du modèle de Production",
                      "Evaluation du modèle de Production",
                      "Entrainement/Réentrainement",
+                     "1Informations et déploiement de modèles",
                      "Informations et déploiement de modèles",
                      "Based de données",
                      "Tests"]

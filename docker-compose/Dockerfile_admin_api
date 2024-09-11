@@ -2,9 +2,14 @@ FROM python:3.10
 
 RUN apt-get update && apt-get install -y libhdf5-dev
 
+RUN wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz \
+    && tar -xvf node_exporter-1.0.1.linux-amd64.tar.gz \
+    && mv node_exporter-1.0.1.linux-amd64 /usr/local/bin/node_exporter \
+    && rm node_exporter-1.0.1.linux-amd64.tar.gz
+
 WORKDIR /app
 
-COPY requirements/requirements_admin_api.txt /app
+COPY ../requirements/requirements_admin_api.txt /app
 
 RUN mkdir /app/src
 RUN mkdir /app/src/api
@@ -17,22 +22,23 @@ RUN mkdir /root/.kaggle
 RUN mkdir -p /app/data
 RUN mkdir /app/data/streamlit_cache
 
-
-COPY src/__init__.py /app/src
-COPY src/api/__init__.py /app/src/api
-COPY src/api/admin_api.py /app/src/api
-COPY src/config /app/src/config
-COPY src/datasets /app/src/datasets
-COPY src/mlflow /app/src/mlflow
-COPY src/models /app/src/models
-COPY src/utils /app/src/utils
-COPY kaggle.json /root/.kaggle
+COPY ../src/__init__.py /app/src
+COPY ../src/api/__init__.py /app/src/api
+COPY ../src/api/admin_api.py /app/src/api
+COPY ../src/config /app/src/config
+COPY ../src/datasets /app/src/datasets
+COPY ../src/mlflow /app/src/mlflow
+COPY ../src/models /app/src/models
+COPY ../src/utils /app/src/utils
+COPY ../kaggle.json /root/.kaggle
 COPY ../.env /app
-COPY ../streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
+COPY ../data/streamlit_cache/streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
 
 RUN pip install -r requirements_admin_api.txt
 
 EXPOSE 8082
+EXPOSE 9100
+
 ENV PYTHONPATH "${PYTHONPATH}:/app/src"
 # Folder init pour l'initilisation de tous les répertoires de données
-CMD python src/utils/utils_folders_init.py && python src/api/admin_api.py
+CMD python src/utils/utils_folders_init.py & python src/api/admin_api.py & /usr/local/bin/node_exporter/node_exporter

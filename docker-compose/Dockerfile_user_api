@@ -2,6 +2,11 @@ FROM python:3.10
 
 RUN apt-get update && apt-get install -y libhdf5-dev
 
+RUN wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz \
+    && tar -xvf node_exporter-1.0.1.linux-amd64.tar.gz \
+    && mv node_exporter-1.0.1.linux-amd64 /usr/local/bin/node_exporter \
+    && rm node_exporter-1.0.1.linux-amd64.tar.gz
+    
 WORKDIR /app
 
 COPY ../requirements/requirements_user_api.txt /app/requirements_user_api.txt
@@ -24,13 +29,14 @@ COPY ../src/datasets /app/src/datasets
 COPY ../src/models /app/src/models
 COPY ../src/utils /app/src/utils
 
-COPY ../streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
+COPY ../data/streamlit_cache/streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
 COPY ../.env /app
 
 RUN pip install -r requirements_user_api.txt
 
 EXPOSE 8081
+EXPOSE 9100
 ENV PYTHONPATH "${PYTHONPATH}:/app/src"
 
 # Folder init pour l'initilisation de tous les répertoires de données
-CMD python src/utils/utils_folders_init.py &&  python src/api/user_api.py
+CMD python src/utils/utils_folders_init.py & python src/api/user_api.py & /usr/local/bin/node_exporter/node_exporter
