@@ -32,7 +32,7 @@ COPY ../src/models /app/src/models
 COPY ../src/utils /app/src/utils
 COPY ../kaggle.json /root/.kaggle
 COPY ../.env /app
-COPY ../data/streamlit_cache/streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
+COPY ./streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
 
 RUN pip install -r requirements_admin_api.txt
 
