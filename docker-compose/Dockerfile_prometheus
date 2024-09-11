@@ -1,0 +1,22 @@
+FROM debian:stable-slim
+
+WORKDIR /etc/prometheus
+
+RUN set -ex && apt-get update -y \
+    && apt-get install wget -y
+
+RUN wget "https://github.com/prometheus/prometheus/releases/download/v2.26.0/prometheus-2.26.0.linux-amd64.tar.gz"
+
+RUN tar -xzf prometheus-2.26.0.linux-amd64.tar.gz \
+    && rm -rf prometheus-2.26.0.linux-amd64.tar.gz \
+    && mv prometheus-2.26.0.linux-amd64/* /etc/prometheus \
+    && rm -rf prometheus-2.26.0.linux-amd64 \
+    && mv /etc/prometheus/prometheus /usr/local/bin/
+
+EXPOSE 8091
+
+COPY ../data/prometheus_data/prometheus_dockers.yml .
+
+ENTRYPOINT ["/usr/local/bin/prometheus"]
+
+CMD ["--config.file=/etc/prometheus/prometheus.yml"]
