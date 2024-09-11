@@ -15,8 +15,6 @@ RUN tar -xzf prometheus-2.26.0.linux-amd64.tar.gz \
 
 EXPOSE 8091
 
-COPY ../data/prometheus_data/prometheus_dockers.yml /etc/prometheus/prometheus.yml
-
 ENTRYPOINT ["/usr/local/bin/prometheus"]
 
 CMD ["--config.file=/etc/prometheus/prometheus.yml"]
