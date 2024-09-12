@@ -9,6 +9,8 @@ services:
     ports:
       - "8082:8082"
     volumes:
+      - ../streamlit_users.json:/app/data/streamlit_cache/streamlit_users.json
+      - ../kaggle.json:/root/.kaggle/kaggle.json
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data

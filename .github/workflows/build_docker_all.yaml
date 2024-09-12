@@ -1,0 +1,88 @@
+name: Docker Build All containers
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    #runs-on: self-hosted
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Install docker-compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        
+    - name: Build User API Docker image
+      run: |
+          echo "API_KEY=${{ secrets.USER_API_KEY }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo '${{ secrets.USERS_JSON }}' > streamlit_users.json
+          docker-compose -f docker-compose/docker-compose_user_api.yml build --no-cache
+
+    - name: Build Admin API Docker image
+      run: |
+          echo "API_KEY=${{ secrets.USER_API_KEY }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "${{ secrets.KAGGLE_JSON }}" > kaggle.json
+          echo '${{ secrets.USERS_JSON }}' > streamlit_users.json
+          docker-compose -f docker-compose/docker-compose_admin_api.yml build --no-cache
+
+    - name: Build Monitoring API Docker image
+      run: |
+          echo "API_KEY=${{ secrets.MONITORING_API_KEY }}" >> .env
+          echo '${{ secrets.USERS_JSON }}' > streamlit_users.json
+          docker-compose -f docker-compose/docker-compose_monitoring_api.yml build --no-cache
+
+    - name: Build MLFlow Docker image
+      run: |
+          docker-compose -f docker-compose/docker-compose_mlflow.yml build --no-cache
+          docker images
+    
+    - name: Build Prometheus Docker image
+      run: |
+          docker-compose -f docker-compose/docker-compose_prometheus.yml build --no-cache
+          docker images
+
+    - name: Build Streamlit Docker image
+      run: | 
+        docker-compose -f docker-compose/docker-compose_streamlit.yml build --no-cache
+
+    - name: Build Streamlit Presentation Docker image
+      run: | 
+        docker-compose -f docker-compose/docker-compose_streamlit_pres.yml build --no-cache
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Tag and push Docker image
+      run: |
+        docker tag user_api:latest ${{ secrets.DOCKER_USERNAME }}/user_api:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/user_api:latest
+        
+        docker tag admin_api:latest ${{ secrets.DOCKER_USERNAME }}/admin_api:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/admin_api:latest
+
+        docker tag monitoring_api:latest ${{ secrets.DOCKER_USERNAME }}/monitoring_api:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/monitoring_api:latest
+
+        docker tag prometheus:latest ${{ secrets.DOCKER_USERNAME }}/prometheus:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/prometheus:latest
+
+        docker tag streamlit:latest ${{ secrets.DOCKER_USERNAME }}/streamlit:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/streamlit:latest
+
+        docker tag streamlit_pres:latest ${{ secrets.DOCKER_USERNAME }}/streamlit_pres:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/streamlit_pres:latest                        

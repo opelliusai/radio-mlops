@@ -52,7 +52,14 @@ services:
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data  
+  prometheus:
+    image: opelliusai/prometheus:latest
+    container_name: prometheus
+    volumes:
+    ports:
+      - "8091:9090"
 volumes:
   main_volume:
   logs:
   shared_data:
+  prometheus_data: {}

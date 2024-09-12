@@ -8,6 +8,7 @@ services:
     ports:
       - "8081:8081"
     volumes:
+      - ../streamlit_users.json:/app/data/streamlit_cache/streamlit_users.json
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data
@@ -20,6 +21,8 @@ services:
     ports:
       - "8082:8082"
     volumes:
+      - ../streamlit_users.json:/app/data/streamlit_cache/streamlit_users.json
+      - ../kaggle.json:/root/.kaggle/kaggle.json
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data
@@ -32,6 +35,7 @@ services:
     ports:
       - "8083:8083"
     volumes:
+      - ../streamlit_users.json:/app/data/streamlit_cache/streamlit_users.json
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data
@@ -71,7 +75,10 @@ services:
       - logs:/var/log
       - shared_data:/app/data  
   prometheus:
-    image: prom/prometheus
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_prometheus
+    image: prometheus:latest
     container_name: prometheus
     volumes:
       - ../data/prometheus_data/prometheus_dockers.yml:/etc/prometheus/prometheus.yml
@@ -81,3 +88,4 @@ volumes:
   main_volume:
   logs:
   shared_data:
+  prometheus_data: {}

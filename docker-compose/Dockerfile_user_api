@@ -29,7 +29,6 @@ COPY ../src/datasets /app/src/datasets
 COPY ../src/models /app/src/models
 COPY ../src/utils /app/src/utils
 
-COPY ./streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
 COPY ../.env /app
 
 RUN pip install -r requirements_user_api.txt
