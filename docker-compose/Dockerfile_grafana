@@ -10,10 +10,10 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget  https://dl.grafana.com/enterprise/release/grafana-enterprise-${GRAFANA_VERSION}.linux-amd64.tar.gz && \
-    tar -zxvf grafana-${GRAFANA_VERSION}.linux-amd64.tar.gz && \
-    mv grafana-${GRAFANA_VERSION} /usr/share/grafana && \
-    rm grafana-${GRAFANA_VERSION}.linux-amd64.tar.gz
-
+    tar -zxvf grafana-enterprise-${GRAFANA_VERSION}.linux-amd64.tar.gz && \
+    mv grafana-v${GRAFANA_VERSION} /usr/share/grafana && \
+    rm grafana-enterprise-${GRAFANA_VERSION}.linux-amd64.tar.gz
+    
 RUN mkdir -p /var/lib/grafana /etc/grafana /var/log/grafana && \
     adduser --system --no-create-home --group grafana && \
     chown -R grafana:grafana /var/lib/grafana /etc/grafana /var/log/grafana

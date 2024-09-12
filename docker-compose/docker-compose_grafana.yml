@@ -1,5 +1,5 @@
 services:
-  prometheus:
+  grafana:
     build:
       context: ..
       dockerfile: docker-compose/Dockerfile_grafana
@@ -7,10 +7,12 @@ services:
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
+      - ../data/grafana_data/grafana.ini:/etc/grafana/grafana.ini
     ports:
       - "8092:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    user: root # Exécution du conteneur en tant que root
     restart: unless-stopped
 volumes:
     grafana_data: {}

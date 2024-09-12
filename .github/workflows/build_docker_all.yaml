@@ -53,6 +53,11 @@ jobs:
           docker-compose -f docker-compose/docker-compose_prometheus.yml build --no-cache
           docker images
 
+    - name: Build Grafana Docker image
+      run: |
+          docker-compose -f docker-compose/docker-compose_grafana.yml build --no-cache
+          docker images
+
     - name: Build Streamlit Docker image
       run: | 
         docker-compose -f docker-compose/docker-compose_streamlit.yml build --no-cache
@@ -80,6 +85,9 @@ jobs:
 
         docker tag prometheus:latest ${{ secrets.DOCKER_USERNAME }}/prometheus:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/prometheus:latest
+
+        docker tag grafana:latest ${{ secrets.DOCKER_USERNAME }}/grafana:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/grafana:latest
 
         docker tag streamlit:latest ${{ secrets.DOCKER_USERNAME }}/streamlit:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/streamlit:latest
