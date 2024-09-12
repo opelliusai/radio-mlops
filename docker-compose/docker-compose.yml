@@ -71,6 +71,7 @@ services:
     ports:
       - "8085:8085"
     volumes:
+      - ../data/raw/streamlit_assets:/app/data/raw/streamlit_assets
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data  

@@ -10,13 +10,11 @@ COPY ../requirements/requirements_streamlit_pres.txt /app/requirements_streamlit
 RUN mkdir src
 RUN mkdir src/streamlit_pres
 RUN mkdir src/config
-RUN mkdir -p /app/data/raw/streamlit_assets
 
 COPY ../src/__init__.py /app/src
 COPY ../src/streamlit_pres /app/src/streamlit_pres
 COPY ../src/streamlit_pres/pages /app/src/streamlit_pres/pages
 COPY ../src/config /app/src/config
-COPY ../data/raw/streamlit_assets/* /app/data/raw/streamlit_assets
 
 RUN pip install -r requirements_streamlit_pres.txt
 
