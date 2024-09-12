@@ -3,6 +3,7 @@ services:
     build:
       context: ..
       dockerfile: docker-compose/Dockerfile_prometheus
+    image: prometheus:latest
     container_name: prometheus
     volumes:
       - ../data/prometheus_data/prometheus_dockers.yml:/etc/prometheus/prometheus.yml
