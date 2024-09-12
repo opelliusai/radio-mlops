@@ -1,0 +1,16 @@
+services:
+  prometheus:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_grafana
+    image: grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "8092:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: unless-stopped
+volumes:
+    grafana_data: {}
