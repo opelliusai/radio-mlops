@@ -15,7 +15,7 @@ logger = setup_logging("STREAMLIT_ADMIN")
 
 
 def main(title):
-    st.header(title)
+    st.header(title, cookies)
     drift_filepath = os.path.join(
         init_paths["main_path"], init_paths["model_drift_folder"], model_info["MODEL_DRIFT_logging_filename"])
     st.subheader("Historique des drift")

@@ -32,7 +32,7 @@ from src.config.log_config import setup_logging
 logger = setup_logging("STREAMLIT_USER")
 
 
-def main(title):
+def main(title, cookies):
     # Affichage du titre
     st.title("Détection d'une anomalie Pulmonaire")
     # Configuration de 2 colonnes : Upload d'une prédiction et affichage du résultat
@@ -55,7 +55,7 @@ def main(title):
                 file_like = BytesIO(uploaded_file.read())
                 filename = uploaded_file.name
                 model_name, prediction, confiance, temps_prediction, image_upload_path, pred_id = utils_streamlit.lancer_une_prediction(
-                    file_like, filename, st.session_state.username)
+                    file_like, filename, cookies.get('username'))
                 st.session_state.prediction = prediction
                 st.session_state.confiance = confiance
                 st.session_state.temps_prediction = temps_prediction

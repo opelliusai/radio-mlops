@@ -8,7 +8,6 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ../streamlit_users.json:/app/data/streamlit_cache/streamlit_users.json
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data
@@ -18,11 +17,10 @@ services:
       dockerfile: docker-compose/Dockerfile_admin_api
     image: admin_api:latest
     container_name: admin_api
+    #environment:
     ports:
       - "8082:8082"
     volumes:
-      - ../streamlit_users.json:/app/data/streamlit_cache/streamlit_users.json
-      - ../kaggle.json:/root/.kaggle/kaggle.json
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data
@@ -32,10 +30,10 @@ services:
       dockerfile: docker-compose/Dockerfile_monitoring_api
     image: monitoring_api:latest
     container_name: monitoring_api
+    #environment:
     ports:
       - "8083:8083"
     volumes:
-      - ../streamlit_users.json:/app/data/streamlit_cache/streamlit_users.json
       - main_volume:/app/volume_data
       - logs:/var/log
       - shared_data:/app/data
@@ -56,6 +54,7 @@ services:
       dockerfile: docker-compose/Dockerfile_streamlit
     image: streamlit:latest
     container_name: streamlit
+    #environment:
     ports:
       - "8084:8084"
     volumes:
@@ -74,7 +73,7 @@ services:
       - ../data/raw/streamlit_assets:/app/data/raw/streamlit_assets
       - main_volume:/app/volume_data
       - logs:/var/log
-      - shared_data:/app/data  
+      - shared_data:/app/data
   prometheus:
     build:
       context: ..
@@ -85,8 +84,24 @@ services:
       - ../data/prometheus_data/prometheus_dockers.yml:/etc/prometheus/prometheus.yml
     ports:
       - "8091:9090"
+  grafana:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile_grafana
+    image: grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../data/grafana_data/grafana.ini:/etc/grafana/grafana.ini
+    ports:
+      - "8092:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    user: root # Exécution du conteneur en tant que root
+    restart: unless-stopped
 volumes:
   main_volume:
   logs:
   shared_data:
   prometheus_data: {}
+  grafana_data: {}

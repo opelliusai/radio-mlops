@@ -20,6 +20,7 @@ RUN mkdir /app/src/datasets
 RUN mkdir /app/src/mlflow
 RUN mkdir /app/src/models
 RUN mkdir /app/src/utils
+RUN mkdir /app/data/streamlit_cache
 
 COPY ../src/__init__.py /app/src
 COPY ../src/api/__init__.py /app/src/api
@@ -29,7 +30,7 @@ COPY ../src/datasets /app/src/datasets
 COPY ../src/mlflow /app/src/mlflow
 COPY ../src/models /app/src/models
 COPY ../src/utils /app/src/utils
-
+COPY ../streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
 COPY ../.env /app
 
 RUN pip install -r requirements_monitoring_api.txt

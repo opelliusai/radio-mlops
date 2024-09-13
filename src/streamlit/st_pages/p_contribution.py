@@ -30,7 +30,7 @@ from src.config.log_config import setup_logging
 logger = setup_logging("STREAMLIT_USER")
 
 
-def main(title):
+def main(title, cookies):
     # Affichage du titre
     st.title("Contribution Détection d'une anomalie Pulmonaire")
     # Configuration de 2 colonnes : Upload d'une prédiction et affichage du résultat

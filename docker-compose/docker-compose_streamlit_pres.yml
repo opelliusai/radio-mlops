@@ -5,7 +5,6 @@ services:
       dockerfile: docker-compose/Dockerfile_streamlit_pres
     image: streamlit_pres:latest
     container_name: streamlit_pres
-    #environment:
     ports:
       - "8085:8085"
     volumes:

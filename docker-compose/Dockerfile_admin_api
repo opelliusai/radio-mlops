@@ -19,6 +19,8 @@ RUN mkdir /app/src/mlflow
 RUN mkdir /app/src/models
 RUN mkdir /app/src/utils
 RUN mkdir -p /app/data
+RUN mkdir /app/data/streamlit_cache
+RUN mkdir /root/.kaggle
 
 COPY ../src/__init__.py /app/src
 COPY ../src/api/__init__.py /app/src/api
@@ -29,6 +31,8 @@ COPY ../src/mlflow /app/src/mlflow
 COPY ../src/models /app/src/models
 COPY ../src/utils /app/src/utils
 COPY ../.env /app
+COPY ../streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
+COPY ../kaggle.json /root/.kaggle/kaggle.json
 
 RUN pip install -r requirements_admin_api.txt
 

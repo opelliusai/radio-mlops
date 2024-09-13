@@ -1,52 +1,66 @@
 import streamlit as st
 from src.utils import utils_streamlit
 from src.streamlit.st_pages import p_predict, p_user_predictions, p_contribution, p_services, p_performance, p_evaluation, p_training, tests, p_models
+from streamlit_cookies_manager import EncryptedCookieManager
 
 # Titre du menu latéral
 st.sidebar.title("Analyse de radiographies pulmonaires")
 
+# Créer un gestionnaire de cookies
+cookies = EncryptedCookieManager(prefix="radio_mlops", password="radio_mlops")
 
-def main():
-    # Initialisation des variables de session
-    if 'logged_in' not in st.session_state:
-        st.session_state.logged_in = False
-    if 'username' not in st.session_state:
-        st.session_state.username = ""
+# Vérifiez que le gestionnaire de cookies est prêt
+if not cookies.ready():
+    st.stop()
 
-    if not st.session_state.logged_in:
-        st.title("Page de Connexion")
-        # Formulaire de connexion
-        username = st.text_input("Nom d'utilisateur")
-        password = st.text_input("Mot de passe", type="password")
-        if st.button("Se connecter"):
+# Fonction pour vérifier si l'utilisateur est déjà connecté
+
+
+def is_logged_in():
+    return cookies.get('logged_in') == 'True'
+
+
+def login():
+    with st.form(key='login_form'):
+        username = st.text_input('Nom d’utilisateur')
+        password = st.text_input('Mot de passe', type='password')
+        submit = st.form_submit_button('Se connecter')
+
+        if submit:
             access_token, username, user_name, user_role = utils_streamlit.login(
                 username, password)
             if access_token:
-                st.session_state.logged_in = True
-                st.session_state.username = username
-                st.session_state.user_name = user_name
-                st.session_state.access_token = access_token
-                st.session_state.user_role = user_role
-                # st.success(f"Bienvenue {user_name} (Profil {user_role})")
+                cookies['logged_in'] = 'True'
+                cookies['username'] = username
+                cookies['user_name'] = user_name
+                cookies['access_token'] = access_token
+                cookies['user_role'] = user_role
+                cookies.save()  # Sauvegarder les cookies après modification
                 st.rerun()  # raffraichissement de la page
             else:
                 st.error("Nom d'utilisateur ou mot de passe incorrect")
+
+
+def main():
+    if not is_logged_in():
+        login()
     else:
-        app_pages = get_menu_list(st.session_state.user_role)
+        app_pages = get_menu_list(cookies.get('user_role'))
         # Affichage du menu latéral
         page = st.sidebar.radio("Navigation", app_pages, index=0)
 
         # Affichage du contenu des pages
         if page == "Mon compte":
             st.title(
-                f"Votre compte - Bienvenue {st.session_state.user_name}")
-            st.subheader(f"(Profil {st.session_state.user_role})")
+                f"Votre compte - Bienvenue {cookies.get('user_name')}")
+            st.subheader(f"(Profil {cookies.get('user_role')})")
             # st.success(
             #    f"Bienvenue {st.session_state.user_name} ! (Profil {st.session_state.user_role})")
             # st.write(f"Identifiant : {st.session_state.username}")
             if st.button("Se déconnecter"):
-                utils_streamlit.logout()
-                st.rerun()  # raffraichissement de la page
+                # utils_streamlit.logout()
+                logout()
+                # st.rerun()  # raffraichissement de la page
 
             if st.button("Modifier mot de passe"):
                 st.text_input("Ancien mot de passe", type="password")
@@ -56,31 +70,33 @@ def main():
                 if st.button("Valider"):
                     # st.success("Mot de passe modifié avec succès!")
                     # st.success("To be implemented!")
-                    utils_streamlit.logout()
-                    st.rerun()  # raffraichissement de la page
+                    # utils_streamlit.logout()
+                    logout()
+                    # st.rerun()  # raffraichissement de la page
             if st.button("Supprimer votre compte"):
                 st.success("To be implemented!")
-                utils_streamlit.logout()
-                st.rerun()  # raffraichissement de la page
+                # utils_streamlit.logout()
+                logout()
+                # st.rerun()  # raffraichissement de la page
         elif page == "Demande d'analyse":
             # p_predict.main(page)
-            p_predict.main(page)
+            p_predict.main(page, cookies)
         elif page == "Mes analyses":
-            p_user_predictions.main(page)
+            p_user_predictions.main(page, cookies)
         elif page == "Contribution":
-            p_contribution.main(page)
-        elif page == "Etat des services" and st.session_state.user_role == 'admin':
-            p_services.main(page)
-        elif page == "Performance du modèle de Production" and st.session_state.user_role == 'admin':
-            p_performance.main(page)
-        elif page == "Evaluation du modèle de Production" and st.session_state.user_role == 'admin':
-            p_evaluation.main(page)
-        elif page == "Entrainement/Réentrainement" and st.session_state.user_role == 'admin':
-            p_training.main(page)
-        elif page == "Informations et déploiement de modèles" and st.session_state.user_role == 'admin':
-            p_models.main(page)
+            p_contribution.main(page, cookies)
+        elif page == "Etat des services" and cookies.get('user_role') == 'admin':
+            p_services.main(page, cookies)
+        elif page == "Performance du modèle de Production" and cookies.get('user_role') == 'admin':
+            p_performance.main(page, cookies)
+        elif page == "Evaluation du modèle de Production" and cookies.get('user_role') == 'admin':
+            p_evaluation.main(page, cookies)
+        elif page == "Entrainement/Réentrainement" and cookies.get('user_role') == 'admin':
+            p_training.main(page, cookies)
+        elif page == "Informations et déploiement de modèles" and cookies.get('user_role') == 'admin':
+            p_models.main(page, cookies)
         elif page == "Tests":
-            tests.main(page)
+            tests.main(page, cookies)
 
 
 def get_menu_list(user_role):
@@ -94,10 +110,7 @@ def get_menu_list(user_role):
                      "Performance du modèle de Production",
                      "Evaluation du modèle de Production",
                      "Entrainement/Réentrainement",
-                     "1Informations et déploiement de modèles",
-                     "Informations et déploiement de modèles",
-                     "Based de données",
-                     "Tests"]
+                     "Informations et déploiement de modèles"]
     elif user_role == 'user':
         # Pages pour l'utilisateur
         app_pages = ["Mon compte",
@@ -107,6 +120,13 @@ def get_menu_list(user_role):
                      "Tests"]
 
     return app_pages
+
+
+def logout():
+    cookies['logged_in'] = 'False'
+    cookies.save()
+    st.success("Déconnexion réussie!")
+    st.rerun()
 
 
 if __name__ == "__main__":

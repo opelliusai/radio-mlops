@@ -163,6 +163,9 @@ Les images disponibles et leurs ports:<br>
 - API Admin : 8082<br>
 - API Monitoring : 8083<br>
 - MLflow : 8090<br>
+- Prometheus : 8090<br>
+- Grafana : 8090<br>
+- Airflow : 8090<br>
 - Streamlit : 8084<br>
 - Streamlit Présentation: 8085<br>
 

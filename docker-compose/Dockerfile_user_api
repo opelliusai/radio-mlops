@@ -28,6 +28,7 @@ COPY ../src/config /app/src/config
 COPY ../src/datasets /app/src/datasets
 COPY ../src/models /app/src/models
 COPY ../src/utils /app/src/utils
+COPY ../streamlit_users.json /app/data/streamlit_cache/streamlit_users.json
 
 COPY ../.env /app
 

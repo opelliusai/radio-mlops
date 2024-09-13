@@ -14,7 +14,7 @@ from src.config.log_config import setup_logging
 logger = setup_logging("STREAMLIT_ADMIN")
 
 
-def main(title):
+def main(title, cookies):
     st.header(title)
     prediction_path = os.path.join(init_paths["main_path"],
                                    init_paths["PRED_logging_folder"], model_info["PRED_logging_filename"])
@@ -45,7 +45,7 @@ def main(title):
         temps_pred = data[["Nom du modèle",
                            "Temps de prédiction", "Date de prédiction"]]
         model_names = temps_pred["Nom du modèle"].unique()
-        selected_model = st.selectbox("Select a model", model_names)
+        selected_model = st.selectbox("Selectionner un modèle", model_names)
         filtered_data = temps_pred[temps_pred["Nom du modèle"]
                                    == selected_model]
         st.line_chart(

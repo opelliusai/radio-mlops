@@ -18,7 +18,7 @@ from src.config.log_config import setup_logging
 logger = setup_logging("STREAMLIT_ADMIN")
 
 
-def main(title):
+def main(title, cookies):
     st.header(title)
 
     st.subheader("Liste des modèles")

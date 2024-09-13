@@ -23,7 +23,7 @@ radioEnv
 mlflow.db
 .env
 */.env
-*.sh
+#*.sh
 airflow
 dags
 src/streamlit/pages/tests.py
