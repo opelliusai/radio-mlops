@@ -38,16 +38,22 @@ def deploy_ready_model():
     start_time = time.time()
     response = requests.post(API_URL_DEPLOY_READY_MODEL)
     details = "None"
+    experiment_link = "A venir"
     if response.status_code == 200:
         status_details = response.json().get("status")
         model_name = response.json().get("model_name")
         model_version = response.json().get("model_version")
         details = f"{status_details} - Modèle {model_name}-{model_version}"
         status = "OK"
+        message_objet = "[Radio-MLOps] Monitoring - Déploiement du modèle {model_name}-{model_version} terminé avec succès"
+        html_message_corps = f"Le déploiement du modèle {model_name}-{model_version} terminé avec succès <br> Lien MLFlow {experiment_link}"
 
     else:
         logger.debug(f"Erreur : {response.status_code} - {response.json()}")
         status = "KO"
+        message_objet = "[Radio-MLOps] Monitoring - Déploiement du modèle {model_name}-{model_version} terminé en erreur"
+        details = f"Erreur : {response.status_code} - {response.json()}"
+        html_message_corps = f"Le déploiement du modèle {model_name}-{model_version} terminé En erreur <br> Détail {details} <br> Lien MLFlow {experiment_link}"
 
     end_time = time.time()
     duree = end_time - start_time
@@ -72,7 +78,7 @@ def deploy_ready_model():
         df_logging = pd.concat([df_logging, new_line_df], ignore_index=True)
         df_logging.to_csv(logging_path, index=False)
 
-    return status, details
+    return status, details, message_objet, html_message_corps
 
 
 if __name__ == "__main__":

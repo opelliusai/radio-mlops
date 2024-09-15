@@ -239,10 +239,10 @@ def update_image(image_uid, pred_id, label):
             logger.debug(f"Ancien Label {old_label}")
             logger.debug(f"Ancien répertoire {rep}")
             df.loc[df["UID"] == image_uid, "Classe"] = label
-            df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"] = new_rep
+            # df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"] = new_rep
             df.loc[df["UID"] == image_uid, "Sous-répertoire"] = new_rep
             new_label = df.loc[df["UID"] == image_uid, "Classe"]
-            new_rep = df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"]
+            # new_rep = df.loc[df["UID"] == image_uid, "Sous-répertoire SOURCE"]
             logger.debug(f"Nouveau Label {new_label}")
             logger.debug(f"Nouveau répertoire {new_rep}")
             logger.debug(f"Nouveau DataFrame {df}")

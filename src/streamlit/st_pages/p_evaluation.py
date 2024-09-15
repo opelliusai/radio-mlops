@@ -14,14 +14,19 @@ from src.utils import utils_streamlit
 logger = setup_logging("STREAMLIT_ADMIN")
 
 
-def main(title):
-    st.header(title, cookies)
+def main(title, cookies):
+    st.header(title)
     drift_filepath = os.path.join(
         init_paths["main_path"], init_paths["model_drift_folder"], model_info["MODEL_DRIFT_logging_filename"])
     st.subheader("Historique des drift")
     if os.path.exists(drift_filepath):
         data_drift = pd.read_csv(drift_filepath, sep=",")
         data_drift = data_drift.drop("UID", axis=1)
+        data_drift = data_drift.drop("New Mean", axis=1)
+        data_drift = data_drift.drop("Original Mean", axis=1)
+        data_drift = data_drift.drop("Original", axis=1)
+        data_drift = data_drift.drop("New STD", axis=1)
+        data_drift = data_drift.drop("Original STD", axis=1)
         data_drift['Drift'] = data_drift['Drift'].map(
             {True: 'OUI', False: 'NON'})
         st.dataframe(data_drift.reset_index(drop=True), hide_index=True)
@@ -32,7 +37,7 @@ def main(title):
     retrain = st.checkbox("Avec réentrainement en cas de drift")
 
     if st.button("Lancer un calcul de drift"):
-        status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link = utils_streamlit.lancer_drift_detection(
+        status, model_name, drift, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link = utils_streamlit.lancer_drift_detection(
             retrain)
 
         if retrain:
@@ -49,8 +54,8 @@ def main(title):
 
         st.success("Calcul de Drift exécuté")
         data = {
-            'Nom': ['status', 'model_name', 'drift', 'new_mean', 'original_mean', 'new_std', 'original_std', 'mean_diff', 'std_diff'],
-            'Valeur': [status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff]
+            'Nom': ['status', 'model_name', 'drift', 'mean_diff', 'std_diff'],
+            'Valeur': [status, model_name, "OUI" if drift == True else "NON", mean_diff, std_diff]
         }
         df = pd.DataFrame(data)
 

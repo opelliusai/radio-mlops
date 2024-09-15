@@ -36,37 +36,40 @@ def main(title, cookies):
     # Configuration de 2 colonnes : Upload d'une prédiction et affichage du résultat
     col_image, col_proposition = st.columns([1, 1])
 
-    # COLUMN 1
-    with col_image:
-        status, image_uid, image_name, image_path, pred_id = utils_streamlit.get_unlabeled_image()
-        if status == "OK":
+    status, image_uid, image_name, image_path, pred_id = utils_streamlit.get_unlabeled_image()
+    if status == "OK":
+        # COLUMN 1
+        with col_image:
+
             st.image(image_path, caption=image_name, use_column_width=True)
             st.write(image_name)
             st.session_state.image_uid = image_uid
             st.session_state.image_name = image_name
             st.session_state.image_upload_path = image_path
             st.session_state.pred_id = pred_id
-    # COLUMN 2 :
-    with col_proposition:
-        col_val, col_inval = st.columns([1, 1])
-        with col_inval:
-            if st.button("Je ne sais pas", on_click=on_button_click):
-                print("Je ne sais pas button clicked")
-                # ne rien faire (image déjà dans la classe UNLABELED
-                st.success(
-                    "Aucune proposition!")
-                st.session_state.clear()
-            proposition = st.selectbox(
-                'Proposition', current_dataset_label_correspondance.keys())
-            if st.button("Soumettre", on_click=on_button_click_proposition):
-                print("Soumettre button clicked")
-                print(f"Proposition {proposition}")
-                # Fonction qui met à jour la classe et déplace l'image
-                utils_streamlit.update_image_label(
-                    st.session_state.image_uid, st.session_state.pred_id, proposition)
+        # COLUMN 2 :
+        with col_proposition:
+            col_val, col_inval = st.columns([1, 1])
+            with col_inval:
+                if st.button("Je ne sais pas", on_click=on_button_click):
+                    print("Je ne sais pas button clicked")
+                    # ne rien faire (image déjà dans la classe UNLABELED
+                    st.success(
+                        "Aucune proposition!")
+                    st.session_state.clear()
+                proposition = st.selectbox(
+                    'Proposition', current_dataset_label_correspondance.keys())
+                if st.button("Soumettre", on_click=on_button_click_proposition):
+                    print("Soumettre button clicked")
+                    print(f"Proposition {proposition}")
+                    # Fonction qui met à jour la classe et déplace l'image
+                    utils_streamlit.update_image_label(
+                        st.session_state.image_uid, st.session_state.pred_id, proposition)
 
-                st.success("La proposition a été validée !")
-                st.session_state.clear()
+                    st.success("La proposition a été validée !")
+                    st.session_state.clear()
+    else:
+        st.warning("Aucune image trouvée")
 
 
 def on_button_click():

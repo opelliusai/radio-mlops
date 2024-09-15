@@ -67,6 +67,7 @@ def model_version_serving(model_name=model_info["model_name_prefix"], num_versio
     logger.debug(
         "Suppression du tag de tous les autres modèles - Un modèle avec le tag ready_prod uniquement")
     registered_models = client.search_registered_models()
+    logger.debug(f"Registered models {registered_models}")
     for model in registered_models:
         if model.name.lower() == model_name.lower():
             logger.debug(
@@ -87,29 +88,33 @@ def auto_model_serving(model_name=model_info["model_name_prefix"]):
     logger.debug(
         f"----------auto_model_serving(model_name={model_name})----------")
     # Récupérer tous les modèles enregistrés
-    registered_models = client.search_registered_models()
-
+    # registered_models = client.search_registered_models()
+    model_versions = client.search_model_versions(f"name='{model_name}'")
+    logger.debug(f"model_versions {model_versions}")
     # Parcourir chaque modèle enregistré
-    for model in registered_models:
-        if model.name.lower() == model_name.lower():
-            logger.debug(f"Model {model.name} trouvé - Parcours des versions")
-            for version in model.latest_versions:
-                logger.debug(f"Version {version.version}")
-                # Récupérer les détails de la version du modèle
-                model_version_details = client.get_model_version(
-                    name=model.name, version=version.version)
-                logger.debug("Récupération des tags")
-                # Accéder aux tags de la version
-                tags = model_version_details.tags
-                logger.debug(f"Tags: {tags}")
-                # Vérifier si le tag `deploy_flag` est présent et a la valeur `production_ready`
-                if tags.get('deploy_flag') == 'production_ready':
-                    logger.debug(f"Tag {tags.get('deploy_flag')} trouvé")
-                    model_version_serving(model.name, version.version)
-
-                    logger.debug(
-                        f"Version déployée en Prod et désactivation des FLAGS")
-                    return model.name, version.version
+    for version in model_versions:
+        logger.debug(f"Version {version.version}")
+        # Récupérer les détails de la version du modèle
+        tags = version.tags
+        logger.debug(f"Tags: {tags}")
+        # Vérifier si le tag `deploy_flag` est présent et a la valeur `production_ready`
+        logger.debug(
+            "verif si deploy_flag prodcution ready est trouvé")
+        logger.debug(f"Tag deploy_flag {tags.get('deploy_flag')}")
+        if 'deploy_flag' in tags.keys() and tags.get('deploy_flag') == 'production_ready':
+            logger.debug(f"Tag {tags.get('deploy_flag')} trouvé")
+            model_version_serving(model_name, version.version)
+            logger.debug(
+                f"Version déployée en Prod et désactivation des FLAGS")
+            logger.debug(
+                f"Modele traité {model_name}-{version.version}")
+            return model_name, version.version
+        else:
+            logger.debug(f"Skip car Tag est None")
+            # Si aucun modèle n'a été déployé, retourner None
+        logger.debug(
+            f"Aucun modèle avec le tag 'deploy_flag' à 'production_ready' n'a été trouvé.")
+    return None, None
 
 
 def check_flags():

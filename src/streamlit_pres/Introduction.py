@@ -8,6 +8,6 @@ st.write("Début 2020, la propagation rapide du coronavirus (COVID-19) a entrav�
 st.subheader("Objectif du client en 2024")
 st.write("Disposer d'un outil de diagnostic tout en conservant un taux élevé de détection COVID, mais sans négliger d'autres pathologies, en particulier la Pneumonie Virale")
 st.write("Mettre à disposition de l'outil aux internes pour établir un premier diagnostic")
-st.write("Mettre à contribution les Radiologues référant pour la validation du diagnostic")
+st.write("Mettre à contribution les Radiologues référents pour la validation du diagnostic")
 
 st.write("L'outil est donc à la fois de diagnostic mais aussi pédagogique")

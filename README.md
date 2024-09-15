@@ -151,23 +151,58 @@ Se positionner dans le répertoire docker-compose<br>
 <br>ou<br>
 -- Construction image par image<br>
 `docker-compose -f docker-compose_<<nom_image>>.yml build --no-cache`
-
+<br>ou<br>
+--  avec un Script shell <br>
+`./docker-compose_all_build.sh`
 -- Démarrer les conteneurs<br>
 `docker-compose up`
 <br>ou<br>
+-- Démarrage avec un script shell<br>
+`./docker-compose_all_start.sh`
 -- Démarrage container par container<br>
 `docker-compose -f docker-compose_<<nom_image>>.yml up --no-cache`
 
 Les images disponibles et leurs ports:<br>
-- API User: 8081<br>
-- API Admin : 8082<br>
-- API Monitoring : 8083<br>
-- MLflow : 8090<br>
-- Prometheus : 8090<br>
-- Grafana : 8090<br>
-- Airflow : 8090<br>
-- Streamlit : 8084<br>
-- Streamlit Présentation: 8085<br>
+API User: 8081<br>
+API Admin : 8082<br>
+API Monitoring : 8083<br>
+MLflow : 8090<br>
+Prometheus : 8091<br>
+Grafana : 8092<br>
+Airflow : 8093<br>
+Streamlit : 8084<br>
+Streamlit Présentation: 8085<br>
+
+8. Exemple de mise en place d'un environnement de Machine Learning pour le projet<br>
+8.1. Téléchargement des données
+- API Admin / Endpoint /download_dataset
+- Les données seront stockées dans le volume docker-compose_shared-data
+data/raw/kaggle_dataset/
+et versionnées sous le format COVID-19_Radiography_Dataset-X.Y (X.Y étant la dernière version mineure)
+- Le log de téléchargement seront stockés dans 
+data/processed/dataset_logging/kaggle_dataset_logging.csv
+
+8.2 Construction des données de référence
+-- API Admin / Endpoint /update_dataset
+source_type="KAGGLE"
+- Les données seront stockées dans le volume docker-compose_shared-data
+data/processed/ref_dataset/
+et versionnées sous le format  RadioPulmonaire-X.Y (X.Y étant la dernière version mineure)
+- Le log de téléchargement seront stockés dans 
+data/processed/dataset_logging/ref_dataset_logging.csv
+
+8.3 Entrainement de modèles
+-- API Admin ou Streamlit Page Entrainement/Reentrainement de modele
+Entrainement initiale : 
+-- API: Options par défaut
+-- Streamlit:
+Option "Entrainement complet (Données de référence uniquement)
+- Sélection du Dataset
+- Hyperparamètre: Max Epochs / Num trials
+
+8.4 Déploiement d'un modèle initial
+-- Streamlit : Information et déploiement de modèles
+
 
 --------
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>

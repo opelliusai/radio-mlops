@@ -297,7 +297,7 @@ def update_metadata_prod(dataset_path, dataset_uid, pred_id, filename, taille_im
         writer = csv.writer(csvfile)
         UID = uuid.uuid4()
         writer.writerow(
-            [UID, dataset_uid, rep, rep, label, filename, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), md5, taille_image, convert_size(taille_image), pred_id])
+            [UID, dataset_uid, rep, label, filename, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), md5, taille_image, convert_size(taille_image), pred_id])
     logger.debug("Ajout terminé")
 
 
@@ -644,6 +644,10 @@ def get_logging_path(type="REF"):
 def initialize_logging_file(type="REF"):
     logger.debug(f"----get_logging_path(type={type})")
     logging_path = get_logging_path(type)
+    parent_dir = os.path.dirname(logging_path)
+    if not os.path.exists(parent_dir):
+        logger.debug(f"Parent dir {parent_dir} n'existe pas, on le crée")
+        os.makedirs(parent_dir)
     if type.lower() == "ref":
         log_columns = ["UID",
                        "Dataset Update SOURCE",
@@ -902,15 +906,15 @@ def get_unlabeled_image():
         # Filtrer les images non labellisées
         df = df[df["Classe"] == "UNLABELED"]
         # Sélectionner une image au hasard
-        if df is None:
-            return "Aucune image non labellisée trouvée.", None, None, None, None
+        if df is None or df.empty:
+            return "KO", None, None, None, None
         else:
             # Sélectionner une image au hasard
             random_image = df.sample(1)
             # Récupérer son UID
             image_uid = random_image["UID"].values[0]
             # Récupérer le chemin de l'image
-            image_path = random_image["Sous-répertoire CIBLE"].values[0]
+            image_path = random_image["Sous-répertoire"].values[0]
             # Récupérer le nom de l'image
             image_name = random_image["Nom de fichier"].values[0]
             pred_id = random_image["Pred ID"].values[0]

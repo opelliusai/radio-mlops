@@ -92,7 +92,7 @@ async def health_check():
 @app.post("/deploy_ready_model",
           summary="Déployer un modèle prêt pour la PROD",
           description="Déployer un modèle qui a un tag prêt pour la PROD")
-def deploy_ready_model():
+async def deploy_ready_model():
     model_name, model_version = model_serving.auto_model_serving()
     return JSONResponse(status_code=200,
                         content={"status": "Déploiement en PROD terminé",
@@ -112,10 +112,10 @@ async def drift_metrics(retrain: bool = False):
     content = {"status": "Calcul terminé",
                "model_name": model_name,
                "drift": drift,
-               "new_mean": new_mean.tolist(),
-               "original_mean": original_mean.tolist(),
-               "new_std": new_std.tolist(),
-               "original_std": original_std.tolist(),
+               # "new_mean": new_mean.tolist(),
+               # "original_mean": original_mean.tolist(),
+               # "new_std": new_std.tolist(),
+               # "original_std": original_std.tolist(),
                "mean_diff": float(mean_diff),
                "std_diff": float(std_diff),
                "status_retrain_diff": "N/A",
@@ -158,14 +158,14 @@ async def drift_metrics(retrain: bool = False):
 
 @ app.post("/train_model", summary="Entrainement d'un modèle",
            description="Entrainement d'un modèle avec plusieurs options")
-def train_model(retrain: bool = False,
-                model_name: str = None,
-                model_version: str = None,
-                include_prod_data: bool = False,
-                balance: bool = True,
-                dataset_version: str = None,  # Par défaut
-                max_epochs: int = model_hp["max_epochs"],
-                num_trials: int = model_hp["num_trials"]):
+async def train_model(retrain: bool = False,
+                      model_name: str = None,
+                      model_version: str = None,
+                      include_prod_data: bool = False,
+                      balance: bool = True,
+                      dataset_version: str = None,  # Par défaut
+                      max_epochs: int = model_hp["max_epochs"],
+                      num_trials: int = model_hp["num_trials"]):
     """
     Scénarios possibles:
     1 - Entrainement from scratch / Dataset définir

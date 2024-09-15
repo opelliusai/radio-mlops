@@ -136,14 +136,14 @@ async def update_dataset_ref(dataset_path: str = None,
 
 @app.post("/train_model", summary="Entrainement d'un modèle",
           description="Entrainement d'un modèle avec plusieurs options")
-def train_model(retrain: bool = False,
-                model_name: str = None,
-                model_version: str = None,
-                include_prod_data: bool = False,
-                balance: bool = True,
-                dataset_version: str = None,  # Par défaut
-                max_epochs: int = model_hp["max_epochs"],
-                num_trials: int = model_hp["num_trials"]):
+async def train_model(retrain: bool = False,
+                      model_name: str = None,
+                      model_version: str = None,
+                      include_prod_data: bool = False,
+                      balance: bool = True,
+                      dataset_version: str = None,  # Par défaut
+                      max_epochs: int = model_hp["max_epochs"],
+                      num_trials: int = model_hp["num_trials"]):
     """
     Scénarios possibles:
     1 - Entrainement from scratch / Dataset définir
@@ -185,7 +185,7 @@ def train_model(retrain: bool = False,
 @app.post("/make_model_prod_ready",
           summary="Rendre un modèle prêt pour la PROD",
           description="Préparation du modèle déploiement au prochain batch")
-def make_model_prod_ready(num_version):
+async def make_model_prod_ready(num_version):
     model_serving.make_prod_ready(num_version=num_version)
     return JSONResponse(status_code=200,
                         content={"status": "Mise à jour terminée"})
@@ -197,7 +197,7 @@ def make_model_prod_ready(num_version):
 @app.post("/deploy_ready_model",
           summary="Déployer un modèle prêt pour la PROD",
           description="Déployer un modèle qui a un tag prêt pour la PROD")
-def deploy_ready_model():
+async def deploy_ready_model():
     model_name, model_version = model_serving.auto_model_serving()
     return JSONResponse(status_code=200,
                         content={"status": "Déploiement en PROD terminé",
@@ -209,7 +209,7 @@ def deploy_ready_model():
 @app.post("/force_model_serving",
           summary="Déployer un modèle prêt pour la PROD",
           description="Déployer un modèle qui a un tag prêt pour la PROD")
-def force_model(num_version: str):
+async def force_model(num_version: str):
     model_serving.model_version_serving(num_version=num_version)
     return JSONResponse(status_code=200,
                         content={"status": "Déploiement terminé"})
@@ -220,7 +220,7 @@ def force_model(num_version: str):
 @app.get("/get_models_list",
          summary="Liste tous les modèles disponibles",
          description="Liste tous les modèles disponibles")
-def get_models_list():
+async def get_models_list():
     list_models = utils_models.get_models()
     logger.debug(f"API ADMIN list_models {list_models}")
 
@@ -234,7 +234,7 @@ def get_models_list():
 @ app.post("/get_runs_info",
            summary="Récupérer les informations sur un ou plusieurs run",
            description="Récupérer les informations des RUNs MLFlow")
-def get_runs_info(run_ids: list):
+async def get_runs_info(run_ids: list):
     runs_info = utils_models.get_runs_info(run_ids)
     return JSONResponse(status_code=200,
                         content={"status": "OK", "runs_info": runs_info})
@@ -245,7 +245,7 @@ def get_runs_info(run_ids: list):
 @ app.post("/get_datasets_list",
            summary="Lister les datasets disponibles",
            description="Lister les datasets disponibles")
-def get_datasets_list(type: str = "REF"):
+async def get_datasets_list(type: str = "REF"):
     list_datasets = utils_data.get_all_dataset_info(type)
     logger.debug(f"list_datasets {list_datasets}")
     data = list_datasets.to_dict(orient='records')

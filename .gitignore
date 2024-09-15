@@ -7,6 +7,7 @@ data/streamlit_cache
 actions-runner
 data
 logs
+Archives_Streamlit
 wandb
 grafana
 prometheus
@@ -31,7 +32,7 @@ workspace
 evidently
 mlops-workspace
 .kaggle
-
+docker-compose/archives_airflow
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

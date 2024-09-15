@@ -27,7 +27,11 @@ def main(title, cookies):
         st.warning("Aucun dataset de prod disponible")
     '''
     dataset_names = [item['Dataset Name'] for item in list_datasets]
-    dataset_names.sort()
+
+    # Tri par ordre decroissant de versions du dataset
+    dataset_names = sorted(dataset_names, key=lambda x: tuple(
+        map(int, x.split('-')[1].split('.'))), reverse=True)
+
     selected_dataset = st.selectbox('Sélection du Dataset', dataset_names)
 
     st.write("Hyperparamètres")

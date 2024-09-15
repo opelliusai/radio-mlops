@@ -339,10 +339,6 @@ def lancer_drift_detection(retrain=False):
         status = response.json().get("status")
         model_name = response.json().get("model_name")
         drift = response.json().get('drift')
-        new_mean = response.json().get('new_mean')
-        original_mean = response.json().get('original_mean')
-        new_std = response.json().get('new_std')
-        original_std = response.json().get('original_std')
         mean_diff = response.json().get('mean_diff')
         std_diff = response.json().get('std_diff')
         status_retrain_diff = response.json().get('status_retrain_diff')
@@ -357,10 +353,6 @@ def lancer_drift_detection(retrain=False):
         logger.debug(f"status = {status}")
         logger.debug(f"model_name = {model_name}")
         logger.debug(f"drift = {drift}")
-        logger.debug(f"new_mean = {new_mean}")
-        logger.debug(f"original_mean = {original_mean}")
-        logger.debug(f"new_std = {new_std}")
-        logger.debug(f"original_std = {original_std}")
         logger.debug(f"mean_diff = {mean_diff}")
         logger.debug(f"std_diff = {std_diff}")
         logger.debug(f"status_retrain_diff = {status_retrain_diff}")
@@ -371,7 +363,7 @@ def lancer_drift_detection(retrain=False):
         logger.debug(f"comb_run_id = {comb_run_id}")
         logger.debug(f"comb_model_version = {comb_model_version}")
         logger.debug(f"comb_experiment_link = {comb_experiment_link}")
-        return status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link
+        return status, model_name, drift, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link
 
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")

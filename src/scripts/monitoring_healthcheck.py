@@ -28,10 +28,11 @@ def global_heathcheck():
         f"----global_heathcheck()---")
     start_time = time.time()
     services = {}
+    message_objet = None
+    html_message_corps = None
     for service in urls_info.keys():
         url = urls_info[service]
         logger.debug(f"Check service {service} on URL {url}")
-
         status = "OK"
         try:
             response = requests.get(url, timeout=10)
@@ -46,16 +47,20 @@ def global_heathcheck():
         except requests.exceptions.ConnectionError:
             services[service] = "DOWN"
             status = "KO"
+        logger.debug(f"Service {service} - {services[service]}")
     end_time = time.time()
     duree = end_time - start_time
     # Logging history
     logging_exists, logging_path = utils_data.check_logging_exists(
         "monitoring")
     if not logging_exists:
+        logger.debug(f"Logging {logging_path} does not exist, initialisation")
         df_logging, logging_path = utils_data.initialize_logging_file(
             "monitoring")
+        logger.debug(f"Logging {logging_path} created - df {df_logging}")
     # Enregistrement des résultats dans le fichier de logging
     else:
+        logger.debug(f"Logging {logging_path} exists, adding new line")
         new_line = {}
         df_logging = pd.read_csv(logging_path)
         new_line["UID"] = uuid.uuid4()
@@ -69,7 +74,16 @@ def global_heathcheck():
         df_logging = pd.concat([df_logging, new_line_df], ignore_index=True)
         df_logging.to_csv(logging_path, index=False)
 
-    return services
+    # Préparer le message à envoyer si 1 service est down
+    if status == "KO":
+        message_objet = "[Radio-MLOps] Monitoring - Healthcheck - KO"
+        html_message_corps = f"Le monitoring a détecté un problème sur un des services : <br>"
+        for service in services.keys():
+            html_message_corps += f"- {service} : {services[service]} <br>"
+    logger.debug(f"status - {status}")
+    logger.debug(f"message_objet - {message_objet}")
+    logger.debug(f"html_message_corps - {html_message_corps}")
+    return status, message_objet, html_message_corps
 
 
 if __name__ == "__main__":

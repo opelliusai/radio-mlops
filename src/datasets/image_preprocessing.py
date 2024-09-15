@@ -124,7 +124,7 @@ def preprocess_unlabeled_data(dataset_path, size, dim):
             reader = csv.DictReader(f)
             for row in reader:
                 logger.debug(f"row {row}")
-                rep_src = row["Sous-répertoire SOURCE"]
+                rep_src = row["Sous-répertoire"]
                 img_name = row["Nom de fichier"]
                 img_path = os.path.join(dataset_path, rep_src, img_name)
                 logger.debug(f"rep_src={rep_src}")

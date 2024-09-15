@@ -21,4 +21,4 @@ RUN pip install -r requirements_streamlit_pres.txt
 EXPOSE 8085
 ENV PYTHONPATH "${PYTHONPATH}:/app/src"
 
-CMD streamlit run src/streamlit_pres/Accueil.py --server.port 8085
+CMD streamlit run src/streamlit_pres/Introduction.py --server.port 8085

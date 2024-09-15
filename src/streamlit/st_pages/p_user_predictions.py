@@ -22,7 +22,7 @@ def main(title, cookies):
     if not os.path.exists(prediction_path):
         st.warning(f"Le fichier {prediction_path} n'existe pas.")
     else:
-        username = st.session_state.username
+        username = cookies.get("username")
         st.subheader(f"Historique de vos prédictions - {username}")
         data = pd.read_csv(prediction_path, sep=",")
         # Filtrer les données pour l'utilisateur connecté
