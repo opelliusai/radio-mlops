@@ -8,14 +8,14 @@ COPY ../requirements/requirements_streamlit.txt /app/requirements_streamlit.txt
 
 RUN mkdir src
 RUN mkdir src/streamlit
-RUN mkdir -p /app/data/raw/streamlit_assets
+#RUN mkdir -p /app/data/raw/streamlit_assets
 
 COPY ../src/__init__.py /app/src
 COPY ../src/streamlit/Accueil.py /app/src/streamlit/Accueil.py
 COPY ../src/streamlit/st_pages /app/src/streamlit/st_pages
 COPY ../src/utils /app/src/utils
 COPY ../src/config /app/src/config
-COPY ../data/raw/streamlit_assets/url_info.csv /app/data/raw/streamlit_assets/url_info.csv
+#COPY ../data/raw/streamlit_assets/url_info.csv /app/data/raw/streamlit_assets/url_info.csv
 
 RUN pip install -r requirements_streamlit.txt
 

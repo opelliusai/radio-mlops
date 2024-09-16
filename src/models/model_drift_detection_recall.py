@@ -9,7 +9,7 @@ from mlflow import MlflowClient
 from datetime import datetime
 from src.config.log_config import setup_logging
 from src.utils import utils_models, utils_data
-
+from src.config.run_config import current_dataset_label_correspondance
 logger = setup_logging("MODELS")
 mlflow_uri = mlflow_info["mlflow_tracking_uri"]
 client = MlflowClient(
@@ -54,7 +54,8 @@ def monitor_new_data_predict(model, new_images, dataset_path):
     logger.debug(f"original_features {original_features}")
     logger.debug(f"y_train {y_train}")
     logger.debug(f"Conversion de y_train en numerique")
-    y_train = utils_data.convert_labels_to_numeric(y_train)
+    y_train = utils_data.label_to_numeric(
+        y_train.tolist(), current_dataset_label_correspondance)
     # Calcul des rappels si les labels sont disponibles
     if y_train is not None and len(y_train) > 0:
         avg_recall = calculate_recall_for_new_and_train(
@@ -87,7 +88,8 @@ def calculate_recall_for_new_and_train(model, new_data, X_train, y_train):
     logger.debug(f"new_pred {new_pred}")
     # Prédictions sur les données d'entraînement
     train_pred_proba = model.predict(X_train, batch_size=32)
-    num_corr = utils_data.generate_numeric_correspondance_np(train_pred_proba)
+    num_corr = utils_data.label_to_numeric(
+        train_pred_proba, current_dataset_label_correspondance)
     logger.debug(f"Numeric correspondance {num_corr}")
     logger.debug(f"train_pred_proba {train_pred_proba}")
     train_pred = np.argmax(train_pred_proba, axis=1)
