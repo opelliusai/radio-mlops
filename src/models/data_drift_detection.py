@@ -21,32 +21,18 @@ def monitor_new_data_predict(feature_extractor, new_images, dataset_path):
 
     new_data = preprocess_unlabeled_data(new_images, 224, 3)
     train_data = preprocess_data(dataset_path, size=224, dim=3)
-    X_train, y_train = map(list, zip(*train_data))
+    X_train, _ = map(list, zip(*train_data))
     new_data = np.array(new_data)
     X_train = np.array(X_train)
 
-    # Extraire les caractéristiques des nouvelles images en utilisant le modèle (par exemple, les activations d'une couche cachée)
-    # feature_extractor = tf.keras.Model(inputs=model.inputs, outputs=model.layers[-3].output)
-    new_features = feature_extractor.predict(new_data)
+    # Extrait les caractéristiques des nouvelles images en utilisant le modèle (par exemple, les activations d'une couche cachée)
+    new_features = feature_extractor.predict(new_data, batch_size=32)
     logger.debug(f"new_features {new_features}")
     # Comparer la distribution des nouvelles caractéristiques avec celles des données d'entraînement initiales
-    original_features = feature_extractor.predict(X_train)
+    original_features = feature_extractor.predict(X_train, batch_size=32)
     logger.debug(f"original_features {original_features}")
 
     return new_features, original_features
-
-
-"""
-Métrique à surveiller:
-Pour les Modèles de Classification :
-
-    Aire Sous la Courbe ROC (AUC ROC)
-    Précision, 
-    Rappel, 
-    Exactitude
-    Score F1
-
-"""
 
 
 def monitor_new_data_mean_std(feature_extractor, new_images, dataset_path):
@@ -65,21 +51,6 @@ def monitor_new_data_mean_std(feature_extractor, new_images, dataset_path):
     # Calcul du temps de prédiction
     temps_calcul = round(end_time-start_time, 2)
     return temps_calcul, new_mean, original_mean, new_std, original_std
-
-
-def monitor_new_data_ks_test(feature_extractor, new_images, dataset_path):
-    logger.debug(
-        f"----------monitor_new_data_ks_test(feature_extractor,new_images,dataset_path)---------")
-    new_features, original_features = monitor_new_data_predict(
-        feature_extractor, new_images, dataset_path)
-    # Calcul des statistiques pour détecter la dérive
-    new_mean = np.mean(new_features, axis=0)
-    original_mean = np.mean(original_features, axis=0)
-
-    new_std = np.std(new_features, axis=0)
-    original_std = np.std(original_features, axis=0)
-
-    return new_mean, original_mean, new_std, original_std
 
 
 def log_mlflow_metrics(new_mean, original_mean, new_std, original_std):

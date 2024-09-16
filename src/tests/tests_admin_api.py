@@ -89,8 +89,6 @@ async def test_get_models_list():
         response = await ac.get("/get_models_list")
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["status"] == "OK"
-'''
-'''
 
 
 @pytest.mark.asyncio

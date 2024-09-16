@@ -9,14 +9,14 @@ Créé le 05/08/2024
 # EfficientNetB0
 from tensorflow.keras.applications.efficientnet import EfficientNetB0
 
-# Imports related to the Neural Networks construction
+# Imports liés à la construction du modèle
 # Layers etc.
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, BatchNormalization, Dropout, Conv2D
 from tensorflow.keras.models import Model  # Models objects
 from tensorflow.keras.optimizers import Adam  # Optimizers
 from tensorflow.keras.regularizers import l2  # Regularizers
 from tensorflow.keras.callbacks import EarlyStopping, CSVLogger, LearningRateScheduler  # Callbacks
-# Import keras tuner
+# Import keras tuner RandomSearch pour la recherche des meilleurs hyperparamètres
 from kerastuner.tuners import RandomSearch
 
 import numpy as np
@@ -25,7 +25,7 @@ from sklearn.model_selection import train_test_split
 import time
 
 # Import des fichiers de configuration et des informations sur les logs
-from src.config.run_config import init_paths, infolog
+from src.config.run_config import init_paths
 from src.utils import utils_data
 # Import de modules internes: ici preprocessing
 from src.datasets import image_preprocessing
@@ -40,6 +40,7 @@ logger = setup_logging("MODELS")
 
 def tuner_randomsearch(ml_hp, full_run_folder, full_kt_folder, keras_tuning_history_filename, X, y, num_classes):
     """
+    (repris du projet github owl-ml)
     Performs hyperparameter tuning using RandomSearch with specified machine learning hyperparameters, 
     logging the process, and utilizing callbacks like EarlyStopping and LearningRateScheduler.
 
@@ -145,6 +146,7 @@ def tuner_randomsearch(ml_hp, full_run_folder, full_kt_folder, keras_tuning_hist
 ######
 def build_model_efficientnetb0(hp, ml_hp, num_classes):
     """
+    (repris du projet github owl-ml)
     Constructs an EfficientNetB0 architecture model for image classification, compatible with binary and multi-class scenarios.
     Utilizes both Keras Tuner optimization hyperparameters and general configuration parameters from a configuration object.
     This configuration includes:
@@ -249,40 +251,3 @@ def build_model(ml_hp, X, y, num_classes):
     model = tuner_randomsearch(ml_hp, full_run_folder, full_kt_folder,
                                keras_tuning_history_filename, X, y, num_classes)
     return model
-
-
-def main():
-    logger.debug("Préparation des paramètres")
-    ml_hp = {}
-    ml_hp['max_epochs'] = 18
-    ml_hp['num_trials'] = 5
-    ml_hp["img_size"] = 224
-    ml_hp["img_dim"] = 3
-    dataset_path = os.path.join(
-        init_paths["main_path"], init_paths["processed_datasets_folder"], "COVID-19_MC_1.4")  # ./data/raw/datasets
-    logger.debug("main - dataset_path{dataset_path}")
-    data = image_preprocessing.preprocess_data(dataset_path, 224, 3)
-    X, y = map(list, zip(*data))
-    for i in y:
-        logger.debug(f"Label {i}")
-    # récupérer une liste unique des labels
-    unique_labels = list(set(y))
-    logger.debug(f"Unique labels {unique_labels}")
-    # Créer un dictionnaire pour mapper les labels à des entiers
-    labels_dic = utils_data.generate_numeric_correspondance(unique_labels)
-    logger.debug(f"Labels dic {labels_dic}")
-    labels_num = utils_data.label_to_numeric(y, labels_dic)
-    logger.debug(f"Labels num {labels_num}")
-    num_classes = 3
-    full_run_folder = os.path.join(
-        init_paths["main_path"], init_paths["run_folder"])  # ./data/processed/mflow
-    full_kt_folder = os.path.join(
-        init_paths["main_path"], init_paths["keras_tuner_folder"])  # ./data/processed/kt
-    keras_tuning_history_filename = "Covid19_3C_EffnetB0_model_history_run_id.csv"
-    model = tuner_randomsearch(ml_hp, full_run_folder, full_kt_folder,
-                               keras_tuning_history_filename, X, labels_num, num_classes)
-    return model
-
-
-if __name__ == "__main__":
-    main()

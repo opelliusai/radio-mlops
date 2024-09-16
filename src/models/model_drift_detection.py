@@ -4,7 +4,7 @@ import os
 import time
 from sklearn.metrics import recall_score
 from src.datasets.image_preprocessing import preprocess_data, preprocess_unlabeled_data
-from src.config.LOCAL_run_config import init_paths, model_info, dataset_info, mlflow_info, drift_info
+from src.config.run_config import init_paths, model_info, dataset_info, mlflow_info, drift_info
 from mlflow import MlflowClient
 from datetime import datetime
 from src.config.log_config import setup_logging
@@ -21,18 +21,7 @@ mlflow.set_registry_uri(mlflow_uri)
 
 def monitor_new_data_predict(model, new_images, dataset_path):
     """
-    Surveille les nouvelles données en comparant les caractéristiques extraites 
-    des nouvelles images et des données d'entraînement, et calcule les rappels.
-
-    Args:
-    - model: modèle complet utilisé pour faire les prédictions.
-    - new_images: nouvelles images à surveiller.
-    - dataset_path: chemin vers les données d'entraînement.
-
-    Retour:
-    - new_features: caractéristiques des nouvelles images.
-    - original_features: caractéristiques des images d'entraînement.
-    - average_recall: moyenne des rappels entre les données d'entraînement et les nouvelles données (si labels disponibles).
+    Detection de drift en se basant sur l'average_recall: moyenne des rappels entre les données d'entraînement et les nouvelles données (si labels disponibles).
     """
 
     # Prétraitement des données
@@ -46,7 +35,7 @@ def monitor_new_data_predict(model, new_images, dataset_path):
     y_train = np.array(y_train)
 
     logger.debug("Début de la prédiction")
-    # Extraire les caractéristiques des nouvelles images et des données d'entraînement
+    # Extraction des caractéristiques des nouvelles images et des données d'entraînement
     new_features = model.predict(new_data, batch_size=32)
     original_features = model.predict(X_train, batch_size=32)
 
@@ -71,15 +60,6 @@ def monitor_new_data_predict(model, new_images, dataset_path):
 def calculate_recall_for_new_and_train(model, new_data, X_train, y_train):
     """
     Calcule la moyenne des rappels entre les données de référence et les nouvelles données.
-
-    Args:
-    - model: modèle TensorFlow complet.
-    - new_data: nouvelles images prétraitées.
-    - X_train: images d'entraînement prétraitées.
-    - y_train: étiquettes d'entraînement.
-
-    Retour:
-    - average_recall: la moyenne des rappels.
     """
     # Prédictions sur les nouvelles données
     new_pred_proba = model.predict(new_data, batch_size=32)
@@ -88,6 +68,7 @@ def calculate_recall_for_new_and_train(model, new_data, X_train, y_train):
     logger.debug(f"new_pred {new_pred}")
     # Prédictions sur les données d'entraînement
     train_pred_proba = model.predict(X_train, batch_size=32)
+    # Conversion en numeriques de np.array
     num_corr = utils_data.label_to_numeric_np(
         train_pred_proba, current_dataset_label_correspondance)
     logger.debug(f"Numeric correspondance {num_corr}")
@@ -95,14 +76,12 @@ def calculate_recall_for_new_and_train(model, new_data, X_train, y_train):
     train_pred = np.argmax(train_pred_proba, axis=1)
     logger.debug(f"train_pred {train_pred}")
 
-    # Calculer le rappel pour les données d'entraînement et les nouvelles données
+    # Calcul du rappel pour les données d'entraînement et les nouvelles données
     recall_train = recall_score(y_train, train_pred, average='macro')
 
-    # Hypothèse : on a des labels pour les nouvelles données (sinon gestion nécessaire en amont)
     recall_new = recall_score(
         y_train[:len(new_pred)], new_pred, average='macro')
 
-    # Moyenne des rappels
     average_recall = (recall_train + recall_new) / 2
     return average_recall
 
@@ -110,15 +89,9 @@ def calculate_recall_for_new_and_train(model, new_data, X_train, y_train):
 def detect_recall_drift(new_recall, original_recall, drift_info):
     """
     Détecte un drift basé sur la différence entre la moyenne des recall des nouvelles données et des données de référence.
-
-    Args:
-    - new_recall: rappel moyen sur les nouvelles données.
-    - original_recall: rappel moyen sur les données de référence.
-    - drift_info: dictionnaire contenant les seuils de détection de drift pour la moyenne et l'écart type.
-
-    Retour:
-    - True si un drift est détecté, False sinon.
+    Retourne le differentiel et un boolean a True si un drift est détecté
     """
+
     # Comparaison des statistiques des rappels
     logger.debug(f"new_recall_mean: {new_recall}")
     logger.debug(f"original_recall_mean: {original_recall}")
@@ -127,13 +100,13 @@ def detect_recall_drift(new_recall, original_recall, drift_info):
     recall_mean_diff = abs(new_recall - original_recall)
     logger.debug(f"Recall mean difference: {recall_mean_diff}")
 
-    # Détection de dérive basée sur un seuil défini dans drift_info
-    mean_threshold = drift_info.get("mean_threshold", 0.05)
+    # Détection de dérive basée sur un seuil défini dans drift_info du fichier de config
+    mean_threshold = drift_info["recall_mean_threshold"]
     logger.debug(f"Threshold {mean_threshold}")
     # Vérification si la différence de moyenne dépasse le seuil
     if recall_mean_diff > mean_threshold:
         logger.debug(
-            f"Drift détecté sur la moyenne des recalls! Différence: {recall_mean_diff}")
+            f"Drift détecté sur la moyenne des recalls. Différence: {recall_mean_diff}")
         return recall_mean_diff, True
     else:
         logger.debug(
@@ -141,67 +114,9 @@ def detect_recall_drift(new_recall, original_recall, drift_info):
         return recall_mean_diff, False
 
 
-def detect_feature_drift(new_features, original_features, threshold=0.1):
-    '''
-    Détecte si un drift est présent en comparant les nouvelles caractéristiques
-    avec les caractéristiques originales. Retourne True si le drift est détecté, sinon False.
-
-    Paramètres:
-    - new_features: np.array de taille (7, 3), représentant les nouvelles images
-    - original_features: np.array de taille (15153, 3), représentant les anciennes images
-    - threshold: un seuil au-dessus duquel un drift est considéré comme détecté
-
-    Retourne:
-    - bool: True si drift détecté, False sinon.
-    '''
-    # Calculer la moyenne des caractéristiques des anciennes images
-    original_mean = np.mean(original_features, axis=0)
-
-    # Calculer la norme entre chaque vecteur dans new_features et le vecteur moyen de original_features
-    distance = np.linalg.norm(new_features - original_mean, axis=1).mean()
-    logger.debug(f"type distance {type(distance)}")
-    logger.debug(f"type threashold {type(threshold)}")
-    logger.debug(f"val distance {distance}")
-    logger.debug(f"val threashold {threshold}")
-    # Vérifier si la distance dépasse le seuil
-    if distance > threshold:
-        return distance, True
-    else:
-        return distance, False
-
-
-def detect_feature_drift_v1(new_features, original_features, drift_info):
-    """
-    Détecte un drift en comparant les caractéristiques des nouvelles données et celles des données de référence.
-
-    Args:
-    - new_features: caractéristiques des nouvelles images.
-    - original_features: caractéristiques des images d'entraînement.
-    - drift_info: dictionnaire contenant les seuils de détection de drift pour la distance des caractéristiques.
-
-    Retour:
-    - True si un drift est détecté, False sinon.
-    """
-    # Calcul d'une distance (par exemple, distance euclidienne moyenne) entre les caractéristiques
-    distance = np.linalg.norm(new_features - original_features, axis=1).mean()
-    logger.debug(f"Distance moyenne entre les caractéristiques : {distance}")
-
-    # Seuil de détection de drift (0.1 par défaut)
-    distance_threshold = drift_info.get("distance_threshold", 0.1)
-
-    if distance > distance_threshold:
-        logger.debug(
-            f"Drift détecté sur les caractéristiques! Distance: {distance}")
-        return True
-    else:
-        logger.debug(
-            "Pas de drift significatif détecté sur les caractéristiques.")
-        return False
-
-
 def drift_detection_main(log=True):
     start_time = time.time()
-    # Récupération des informations sur les bases courantes
+    # Récupération des informations sur les bases courantes de reference et production
     ref_dataset = utils_data.get_latest_dataset_info()
     ref_dataset_path = ref_dataset["Chemin du Dataset"]
 
@@ -218,11 +133,6 @@ def drift_detection_main(log=True):
         model, prod_dataset_path, ref_dataset_path
     )
 
-    drift_info = {
-        "mean_threshold": 0.05,  # Seuil de 5% de différence pour le recall
-        "distance_threshold": 0.1,  # Seuil de différence pour les caractéristiques
-    }
-
     # Détection de drift basé sur le rappel (si applicable)
     if avg_recall is not None:
         # Rappel moyen pour les données d'entraînement et nouvelles données
@@ -234,14 +144,8 @@ def drift_detection_main(log=True):
 
     logger.debug(f"recall drift_detected {drift_detected}")
     # Détection de drift basé sur les caractéristiques extraites
-    distance, feature_drift_detected = detect_feature_drift(
-        new_features, original_features, threshold=0.1)
 
     drift = False
-    if feature_drift_detected:
-        logger.debug(
-            f"Un Data drift détecté (non utilisé ici) distance {distance}")
-        drift = False
     if drift_detected:
         logger.debug(
             f"Un model drift a été détecté. recall_mean_diff {recall_mean_diff}")
@@ -271,7 +175,7 @@ def log_mlflow_metrics(recall_diff):
     else:
         experiment_id = experiment.experiment_id
     logger.info(f"MLFlow - Model Tracking Experiment_ID {experiment_id}")
-    # Enregistrer ces statistiques dans MLflow
+    # Logging des statistiques dans MLflow
     with mlflow.start_run(experiment_id=experiment_id) as run:
         logger.debug(f"recall_diff {recall_diff}")
         mlflow.log_metric("recall_diff", recall_diff)

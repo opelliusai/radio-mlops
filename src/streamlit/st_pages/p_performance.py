@@ -55,7 +55,6 @@ def main(title, cookies):
         perf_pred = data[["Nom du modèle",
                           "Perf Prédiction", "Date de prédiction"]]
         model_names = temps_pred["Nom du modèle"].unique()
-        # selected_model = st.selectbox("Select a model", model_names)
         filtered_data = perf_pred[perf_pred["Nom du modèle"] == selected_model]
         st.line_chart(
             filtered_data, x=perf_pred.columns[2], y=perf_pred.columns[1])

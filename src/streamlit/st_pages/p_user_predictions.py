@@ -15,7 +15,6 @@ logger = setup_logging("STREAMLIT_USER")
 
 
 def main(title, cookies):
-    # st.header(title)
     print("Début de la fonction main")
     prediction_path = os.path.join(init_paths["main_path"],
                                    init_paths["PRED_logging_folder"], model_info["PRED_logging_filename"])

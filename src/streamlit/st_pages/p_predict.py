@@ -3,11 +3,6 @@ Créé le 08/08/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
 @summary: Page pour la prédiction d'une Anomalie Pulmonaire (COVID ou Pneumonia Virale)
--- Gestion du compte
-    -- Inscription (à venir) 
-    -- Authentification (Avec Profil simple ou admin)
-    -- Modification du mot de passe (à venir)
-    -- Suppression du compte (à venir)
 -- Prédiction
     -- Historique des prédictions de l'utilisateur (à venir)
     -- Exécution d'une prédiction et visualisation du résultat avec indice de confiance
@@ -113,8 +108,6 @@ def on_button_click():
 
 def on_button_click_proposition():
     st.session_state.button_clicked = True
-    # st.session_state.input_value =
-    # print(f"session_state input value {st.session_state.input_value}")
 
 
 if __name__ == "__main__":

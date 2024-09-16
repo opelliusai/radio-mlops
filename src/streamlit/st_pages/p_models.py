@@ -73,8 +73,6 @@ def main(title, cookies):
         # Add more fields as needed
         params = selected_item["PARAMS"]
         print(f"params {params}")
-        # st.write(f"Dataset {params['Dataset']}")
-        # st.write(f"params {params}")
         # Créer un DataFrame
         df = pd.DataFrame(list(params.items()), columns=[
                           'Paramètre', 'Valeur'])

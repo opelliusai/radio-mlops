@@ -17,21 +17,15 @@ import time
 from keras.models import load_model
 from keras.optimizers import Adam
 import pandas as pd
-
-# Internal imports
-from src.utils import utils_models
-from src.utils import utils_data
-from src.datasets import image_preprocessing
 from datetime import datetime
 import os
 from mlflow.tracking import MlflowClient
 import mlflow
+
+# Internal imports
+from src.utils import utils_models, utils_data
+from src.datasets import image_preprocessing
 # Configuration file import
-'''
-src.config file contains information of the repository
-paths[]: Folders and subfolders to find or generate information ex : paths['main'] is the project path
-infolog[]: Logging information : Folder, logname ex : utils_models.log
-'''
 
 logger = setup_logging("MODELS")
 mlflow_uri = mlflow_info["mlflow_tracking_uri"]
@@ -40,11 +34,13 @@ client = MlflowClient(
 
 mlflow.set_tracking_uri(mlflow_uri)
 mlflow.set_registry_uri(mlflow_uri)
+
 # Model evaluation function
 
 
 def evaluate_model(model, X_eval, y_eval, num_classes, class_mapping):
     """
+    (du projet github owl-ml)
     Evaluates the model and returns metrics, confusion matrix, and classification report.
 
     :param model: Model to be evaluated.
@@ -72,11 +68,6 @@ def evaluate_model(model, X_eval, y_eval, num_classes, class_mapping):
             "Recall": metrics_dict["Recall"],
             "F1-score": metrics_dict["F1-score"]
         }
-        '''
-        for i, (sensitivity, specificity) in enumerate(zip(metrics_dict["Sensitivity - Recall"], metrics_dict["Specificity"])):
-            final_metrics[f'Recall sensitivity_class_{i}'] = sensitivity
-            final_metrics[f'Recall specificity_class_{i}'] = specificity
-        '''
         logger.debug(f"Metrics: {final_metrics}")
         logger.debug(f"Confusion Matrix: {metrics_dict['Confusion Matrix']}")
         logger.debug(
@@ -178,7 +169,7 @@ def predict_one_image(model, image_obj):
     # Exécution de la prédiction
     predictions_list = model.predict(image_obj)[0]
     logger.debug(f"predictions_list {predictions_list}")
-    # correspondance={'Viral Pneumonia': 0, 'COVID': 1, 'Normal': 2}
+    # dictionnaire de correspondance dans le fichier run_config
     correspondance = current_dataset_label_correspondance
     correspondance_num = utils_data.invert_dict(correspondance)
     # Fin du compteur
@@ -188,7 +179,6 @@ def predict_one_image(model, image_obj):
     logger.debug(f"Prediction: {predictions_list}")
     indice_max = np.argmax(predictions_list)
     print("Indice de la valeur maximale :", indice_max)
-    # A implementer
     confiance_prediction = f"{round(predictions_list[indice_max]*100,2)}"" %"
     logger.debug(f"confiance_prediction: {confiance_prediction}")
     prediction_label = correspondance_num[indice_max]
@@ -208,8 +198,6 @@ def main():
     logger.debug(f"prediction_logging_filepath {prediction_logging_filepath}")
     logger.debug(f"Chargement du modèle {model_info['selected_model_name']}")
     model = utils_models.load_model(model_path)
-    # custom_objects = {'Adam': Adam}
-    # model = load_model(model_path, custom_objects=custom_objects)
     logger.debug(f"Model chargé - Lancement de la prédiction")
     image_path = os.path.join(
         init_paths["main_path"], init_paths["test_images"], "COVID-1.png")

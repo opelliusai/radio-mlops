@@ -14,12 +14,10 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 import pandas as pd
 import uuid
 import shutil
-import traceback
 # Imports internes
 from src.utils import utils_data
 from src.config.run_config import init_paths, dataset_info
 from src.config.log_config import setup_logging
-# Redirection vers le fichier de log radio-mlops_datasets.log
 logger = setup_logging("datasets")
 
 # FONCTIONS PRINCIPALES

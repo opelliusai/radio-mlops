@@ -28,6 +28,7 @@ def preprocess_data(dataset_path, model_name_metadata_path=None, size=224, dim=3
     logger.debug(
         f"---------image_preprocessing.py----Fonction  preprocess_data(dataset_path={dataset_path},model_name_metadata_path={model_name_metadata_path},size={size},dim={dim})")
     """
+    (reprise du projet github owl-ml)
     Fonction qui prétraite les données d'image pour les modèles de réseau de neurones.
     Le fichier metadata.csv présent dans le dataset permet d'identifier le label qui peut être différent du nom du sous-répertoire.
     Cette fonction peut être précédée par une fonction d'équilibrage du nombre de données par classe, traitée et logués dans un ficheir metadata.csv
@@ -222,8 +223,3 @@ def main_dataset_model():
     except Exception as e:
         logger.error(f"Une erreur s'est produite : {e}")
         return e
-
-
-if __name__ == "__main__":
-    # main_dataset()
-    main_dataset_model()

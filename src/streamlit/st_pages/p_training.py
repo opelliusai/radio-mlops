@@ -21,11 +21,6 @@ def main(title, cookies):
         "Entrainement complet (Données de Référence uniquement)", "Réentrainement (avec les données de production)", "Entrainement du modèle de Production avec les données de PROD"])
 
     list_datasets = utils_streamlit.admin_get_datasets()
-    '''
-    list_prod_datasets = utils_streamlit.admin_get_prod_datasets()
-    if list_prod_datasets is None:
-        st.warning("Aucun dataset de prod disponible")
-    '''
     dataset_names = [item['Dataset Name'] for item in list_datasets]
 
     # Tri par ordre decroissant de versions du dataset

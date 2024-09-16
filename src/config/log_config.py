@@ -3,8 +3,7 @@ Créé le 05/08/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
 @summary: Fichier de configuration des logs
-Actuellement toutes les logs seront stockées dans le même fichier projet
-A terme sera divisé par périmètre en déclarant le logger au niveau du fichier
+Sera divisé par périmètre en déclarant le logger au niveau du fichier
 
 '''
 # IMPORTS

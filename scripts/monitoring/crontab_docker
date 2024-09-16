@@ -1,3 +1,0 @@
-# crontab
-*/2 * * * * /usr/bin/python3 /app/src/scripts/monitoring_healthcheck.py >> /app/data/cron.log 2>&1
-* * * * * /usr/bin/python3 /app/src/scripts/monitoring_deployment.py >> /app/data/cron.log 2>&1

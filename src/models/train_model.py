@@ -15,13 +15,12 @@ import time
 import numpy as np
 from tensorflow.keras.callbacks import EarlyStopping, CSVLogger, LearningRateScheduler  # Callbacks
 
-from src.config.run_config import init_paths, dataset_info, infolog, model_hp
 
 # Import des modules internes
+from src.config.run_config import init_paths
 from src.models import build_model
-from src.datasets import update_dataset, image_preprocessing
-from src.utils import utils_data
-from src.utils import utils_models
+from src.datasets import image_preprocessing
+from src.utils import utils_data, utils_models
 from src.config.log_config import setup_logging
 
 logger = setup_logging("MODELS")
@@ -33,6 +32,7 @@ def train_model(model, ml_hp, X, y, full_run_folder, model_training_history_csv)
     logger.debug(
         f"train_model(model={model}, ml_hp={ml_hp}, X, y={y}, full_run_folder={full_run_folder}, model_training_history_csv={model_training_history_csv})")
     """
+    (du projet github owl-ml)
     Trains the model using provided data, MLFlow hyperparameters, and run ID for file naming (CSVLogger).
     It could be an initial model training, or a new training based on new production data
     :param model: The model to be trained.
@@ -76,7 +76,6 @@ def train_model(model, ml_hp, X, y, full_run_folder, model_training_history_csv)
             monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto')
 
         # CSV Logger
-        # csv_logger_filename=f"model_training_logs_{run_id}_{ml_hp['archi']}.csv"
         logger.debug(
             f" Model Training CSV logger file name  {model_training_history_csv}")
         full_csv_logger_path = os.path.join(
@@ -127,32 +126,6 @@ def train_model(model, ml_hp, X, y, full_run_folder, model_training_history_csv)
     except ValueError as e:
         logger.error(f"ValueError: {e}")
         raise
-
-
-'''
-def drift_detection_action():
-    """
-    Activé lorsqu'un drift est détecté. 
-    # Effectue l'entrainement du modèle sur les données de reference + prod
-    # Effectuer un réentrainement du modèle de production sur les données de production
-    """
-    logger.debug(f"-----drift_detection_action()----")
-    ref_dataset=os.path.join(init_paths["main_path"],init_paths["processed_datasets_folder"],dataset_info["dataset_prefix"]+dataset_info["dataset_version"])
-    prod_dataset=os.path.join(init_paths["main_path"],init_paths["prod_datasets_folder"],dataset_info["prod_dataset_prefix"]+dataset_info["prod_dataset_version"])
-    logger.debug(f"ref_dataset {ref_dataset}")
-    logger.debug(f"prod_dataset {prod_dataset}")
-    
-    logger.debug("1- Réentrainement du modèle actuelle sur les données de production")
-    logger.debug("-- Chargement du modèle de production")
-    current_model = utils_models.get_mlflow_prod_model()
-    #retrain_model_main(current_model,prod_dataset)
-    logger.debug("2- Fusion des deux datasets ref + prod et Entrainement d'un nouveau modèle")
-    new_dataset_path=update_dataset.merge_datasets()
-    logger.debug(f"new_dataset_path {new_dataset_path}")
-    model_tracking.mlflow_train_model(new_dataset_path,
-                    max_epochs=1,
-                    num_trials=1)
-'''
 
 
 def retrain_model_main(model, dataset_path, max_epochs=18, num_trials=5):
@@ -226,7 +199,3 @@ def train_model_main(dataset_path, max_epochs=18, num_trials=5):
         init_paths["main_path"], init_paths["models_path"], f"COVID19_Effnetb0_Model_{version}.h5")
     utils_models.save_model(final_model, model_save_path_keras)
     utils_models.save_model(final_model, model_save_path_h5)
-
-
-if __name__ == "__main__":
-    drift_detection_action()

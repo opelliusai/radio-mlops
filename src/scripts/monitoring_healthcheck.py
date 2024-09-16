@@ -3,8 +3,8 @@ Créé le 08/09/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
 @summary: Script monitoring - Healthcheck
--- Déploie le modèle ayant un Tag
---
+-- Vérification du statut des différents services
+-- Envoie le contenu du mail pour le DAG si au moins un des services est HS
 
 '''
 from src.config.log_config import setup_logging
@@ -30,10 +30,10 @@ def global_heathcheck():
     services = {}
     message_objet = None
     html_message_corps = None
+    status = "OK"
     for service in urls_info.keys():
         url = urls_info[service]
         logger.debug(f"Check service {service} on URL {url}")
-        status = "OK"
         try:
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
@@ -84,7 +84,3 @@ def global_heathcheck():
     logger.debug(f"message_objet - {message_objet}")
     logger.debug(f"html_message_corps - {html_message_corps}")
     return status, message_objet, html_message_corps
-
-
-if __name__ == "__main__":
-    services = global_heathcheck()

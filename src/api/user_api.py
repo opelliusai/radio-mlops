@@ -8,6 +8,7 @@ Créé le 07/08/2024
     -- Authentification (Avec Profil simple ou admin)
     -- Modification du mot de passe (à venir)
     -- Suppression du compte (à venir)
+    -- Déconnexion
 -- Prédiction
     -- Historique des prédictions de l'utilisateur (à venir)
     -- Exécution d'une prédiction et visualisation du résultat avec indice de confiance
@@ -76,7 +77,7 @@ logger.debug(f"Chemin users_file {users_file}")
 
 # Chargement des users
 USERS = load_users()
-logger.debug(f"Users {USERS}")
+# logger.debug(f"Users {USERS}")
 # Modèle Pydantic pour le token
 
 
@@ -107,13 +108,13 @@ def verify_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/token"))):
         if username is None or username not in USERS:
             logger.warning("Le token ne contient pas de 'sub' valide")
             raise HTTPException(
-                status_code=401, detail="Could not validate credentials")
+                status_code=401, detail="Impossible de valider les credentials")
         logger.info(f"Token validé pour l'utilisateur: {username}")
         return username
     except jwt.PyJWTError as e:
         logger.error(f"Erreur lors de la validation du token: {str(e)}")
         raise HTTPException(
-            status_code=401, detail="Could not validate credentials")
+            status_code=401, detail="Impossible de valider les credentials")
 
 # Fonction pour vérifier la clé API
 
@@ -130,7 +131,7 @@ def verify_api_key(api_key: str = Header(..., alias="api-key")):
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    if form_data.username not in USERS or form_data.password != ADMIN_PASSWORD:
+    if form_data.username not in USERS or form_data.password != USERS[form_data.username]["password"]:
         logger.warning(
             f"Tentative de connexion échouée pour l'utilisateur: {form_data.username}")
         raise HTTPException(
@@ -165,20 +166,10 @@ def save_users(users: Dict[str, Dict]):
 
 # Création des chemins d'accès aux fichiers et dossiers
 # Nom du modèle à utiliser
-# model_path=os.path.join(init_paths["main_path"],init_paths["models_path"],model_info["selected_model_name"])
 img_storage_path = os.path.join(
     init_paths["main_path"], init_paths["PRED_images_folder"])
 prediction_logging_filepath = os.path.join(
     init_paths["main_path"], init_paths["PRED_logging_folder"], model_info["PRED_logging_filename"])
-
-'''
-## 3 - Chargement du modèle une fois
-model_name=model_info["selected_model_name"]
-#model=utils_models.load_model(model_path)
-model = utils_models.get_mlflow_prod_model()
-## 4 - Charger les variables d'environnement
-#load_dotenv()
-'''
 
 # Chargement des variables d'environnement
 # load_dotenv()
@@ -236,16 +227,6 @@ async def health_check():
 
 
 # Login
-'''
-@app.post("/login", summary="")
-async def login(request: LoginRequest):
-    user = USERS.get(request.username)
-    if user and user["password"] == request.password:
-        return {"username": user["username"], "role": user["role"]}
-    else:
-        raise HTTPException(status_code=401, detail="Identifiants incorrects")
-'''
-
 
 @app.post("/login", summary="")
 async def login(login_request: OAuth2PasswordRequestForm = Depends()):
@@ -312,7 +293,6 @@ def verify_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/token"))):
 @app.post("/predict", summary="Prédiction sur une image", description="Evaluation de l'état pulmonaire basé sur une image")
 async def predict(username: str,
                   image: UploadFile = File(...)):
-    # Temporairement sans authentification
     logger.debug("---------------user_api: /predict---------------")
     logger.debug(f"Username {username}")
     image_original_name = image.filename

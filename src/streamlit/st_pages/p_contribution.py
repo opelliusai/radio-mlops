@@ -80,8 +80,6 @@ def on_button_click():
 
 def on_button_click_proposition():
     st.session_state.button_clicked = True
-    # st.session_state.input_value =
-    # print(f"session_state input value {st.session_state.input_value}")
 
 
 if __name__ == "__main__":

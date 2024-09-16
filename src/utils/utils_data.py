@@ -13,15 +13,14 @@ from collections import defaultdict
 import math
 import os
 import shutil
-import random
 from datetime import datetime
 import os
 import hashlib
 import uuid
-from src.config.run_config import init_paths, dataset_info, model_info, current_dataset_label_correspondance, monitoring_info
 import csv
-from src.config.log_config import setup_logging
 import pandas as pd
+from src.config.run_config import init_paths, dataset_info, model_info, current_dataset_label_correspondance, monitoring_info
+from src.config.log_config import setup_logging
 logger = setup_logging("UTILS_DATA")
 
 
@@ -40,11 +39,11 @@ def label_to_numeric_np(labels, correspondance):
     '''
     Convertit les labels (np.array) en valeurs numériques en utilisant une correspondance donnée.
     '''
-    # Extraire les clés et valeurs de la correspondance
+    # Extraction des clés et valeurs de la correspondance
     unique_labels = np.array(list(correspondance.keys()))
     numeric_values = np.array(list(correspondance.values()))
 
-    # Utiliser numpy pour associer chaque label à sa valeur numérique
+    # Utilisation de numpy pour associer chaque label à sa valeur numérique
     indices = np.searchsorted(unique_labels, labels)
     return numeric_values[indices]
 
@@ -105,7 +104,6 @@ def generer_metadata_json(dataset_path, dataset_name, description, version):
     :return json_dict à écrire dans un fichier type metadata.json
     '''
     current_date = datetime.now()
-    # Format the date as YYYY-MM-DD
     creation_date = current_date.strftime("%Y-%m-%d")
     json_dict = {}
     json_dict["dataset_name"] = dataset_name
@@ -142,7 +140,6 @@ def get_size(start_path='.'):
     for dirpath, _, filenames in os.walk(start_path):
         for f in filenames:
             fp = os.path.join(dirpath, f)
-            # skip if it is symbolic link
             if not os.path.islink(fp):
                 total_size += os.path.getsize(fp)
 
@@ -389,9 +386,6 @@ def log_dataset_info(dataset_name, dataset_version, desc, nb_classes, nb_images_
     # - Chemin metadata_json
     """
     logger.debug(f"log_dataset_info(type={type})")
-    # logger.debug(f"log_dataset_info(dataset_name={dataset_name}, dataset_version={str(dataset_version)}, desc={desc}, nb_classes={str(nb_classes)}, nb_images_per_class={str(nb_images_per_class)},
-    #                 nb_total_images={str(nb_total_images)}, dataset_path={dataset_path}, metadata_csv_path={metadata_csv_path}, metadata_json_path={metadata_json_path},
-    #                 creation_date={creation_date}, last_update={last_update}, is_current_dataset={str(is_current_dataset)}, type={type}")
     dataset_logging_path = get_logging_path(type)
     unique_id = str(uuid.uuid4())
     dataset_infos = {
@@ -454,7 +448,7 @@ def get_current_dataset(type="REF"):
     else:
         with open(dataset_logging_path, 'r') as file:
             csv_reader = csv.reader(file)
-            next(csv_reader)  # Skip the header row
+            next(csv_reader)
             for row in csv_reader:
                 logger.debug(f"row {row} - {len(row)}")
                 logger.debug(f"row 12 - {bool(row[12])}")
@@ -625,24 +619,6 @@ def get_dataset_info_by_dataset_name(dataset_name, type="REF"):
         logger.debug(f"Aucun dataset trouvé avec le nom {dataset_name}")
         return None
     return dataset_info.iloc[0]
-
-
-def DELETE_get_dataset_info_by_dataset_name(dataset_name, type="REF"):
-    exist, filepath = check_logging_exists(type)
-    if not exist:
-        logger.debug("Le fichier dataset logging n'existe pas")
-        return None
-    logger.debug(
-        f"get_dataset_info_by_dataset_name(dataset_name={dataset_name}, type={type})")
-    # Charger le fichier csv
-    data = pd.read_csv(filepath)
-    logger.debug(f"Data {data['Dataset Name']}")
-    # Trouver la ligne correspondante
-    dataset_info = data.loc[data['Dataset Name'] == dataset_name]
-    # Réinitialiser l'index du résultat
-    dataset_info = dataset_info.reset_index(drop=True)
-    logger.debug(f"dataset_info {dataset_info.to_string(index=False)}")
-    return dataset_info
 
 
 def get_logging_path(type="REF"):

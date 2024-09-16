@@ -26,7 +26,7 @@ from src.config.run_config import init_paths, dataset_info, current_dataset_labe
 from src.utils import utils_data
 from src.utils import utils_models
 # Import de modules internes: ici les modules liés à la construction /entrainement du modele
-from src.models import build_model, predict_model, train_model
+from src.models import build_model, train_model
 from src.datasets import update_dataset, clean_dataset, image_preprocessing
 
 from src.config.log_config import setup_logging
@@ -79,15 +79,6 @@ def model_tracking(dataset_infos, balance=True,
     logger.debug(
         f"MLFLOW - Model tracking initiated with parameters: dataset_infos={dataset_infos}, balance={balance}, max_epochs={max_epochs}, num_trials={num_trials}, experiment_name={experiment_name}")
 
-    """
-    if init_model_name is None:
-        # On ne précise pas de modèle initial, on récupère le modèle en production
-        _, init_model_name, init_model_version = utils_models.get_mlflow_prod_model()
-
-    init_model = f"{init_model_name}-{init_model_version}"
-    """
-
-    # dataset_name = os.path.basename(dataset_version_path)
     model_hp.update({"max_epochs": max_epochs, "num_trials": num_trials})
     logger.debug(
         f"Définition d'une version de modèle pour nommage du fichier metadata")
@@ -162,12 +153,12 @@ def model_tracking(dataset_infos, balance=True,
         eval_metrics = utils_models.get_prediction_metrics(
             trained_model, X_eval, y_eval)
 
-        # Extraire la matrice de confusion et le rapport de classification du dictionnaire des métriques
+        # Extraction de la matrice de confusion et du rapport de classification du dictionnaire des métriques
         confusion_matrix = eval_metrics.pop('Confusion Matrix', None)
         classification_report = eval_metrics.pop('Classification report', None)
 
         if confusion_matrix is not None:
-            # Enregistrer la matrice de confusion en tant qu'artefact
+            # Enregistrement de la matrice de confusion en tant qu'artefact
             confusion_matrix_df = pd.DataFrame(confusion_matrix)
             confusion_matrix_csv_path = os.path.join(
                 full_run_folder, 'confusion_matrix.csv')
@@ -175,7 +166,7 @@ def model_tracking(dataset_infos, balance=True,
             mlflow.log_artifact(confusion_matrix_csv_path)
 
         if classification_report is not None:
-            # Enregistrer les éléments du rapport de classification en tant que métriques individuelles
+            # Enregistrment des éléments du rapport de classification en tant que métriques individuelles
             for label, metrics_dict in classification_report.items():
                 if isinstance(metrics_dict, dict):
                     for metric_name, value in metrics_dict.items():
@@ -183,7 +174,7 @@ def model_tracking(dataset_infos, balance=True,
                 else:
                     mlflow.log_metric(f"eval_{label}", metrics_dict)
 
-            # Enregistrer le rapport de classification complet en tant qu'artefact JSON
+            # Enregistrement du rapport de classification complet en tant qu'artefact JSON
             classification_report_json_path = os.path.join(
                 full_run_folder, 'classification_report.json')
             with open(classification_report_json_path, 'w') as f:
@@ -198,12 +189,6 @@ def model_tracking(dataset_infos, balance=True,
             dataset_infos["Chemin du Dataset"], artifact_path="Dataset")
         mlflow.keras.log_model(trained_model, "model")
 
-        """try:
-            client.get_registered_model(init_model_name)
-        except MlflowException:
-            # client.create_registered_model(
-            #    name=init_model_name, description=model_info["model_desc"])
-        """
         return new_model_info.run_id, new_model_info.name, new_model_info.version, experiment_id
 
 
@@ -228,8 +213,6 @@ def model_retrain(model, dataset_infos,
     # 7. Enregistrement des hyperparamètres
     # 8. Enregistrement des métriques
     # 9. Log du modèle
-    # dataset_path=os.path.join(init_paths["main_path"],init_paths["processed_datasets_folder"],dataset_version)
-    # experiment_name = "Model Retraining"
     experiment = mlflow.get_experiment_by_name(experiment_name)
     if experiment is None:
         experiment_id = mlflow.create_experiment(experiment_name)
@@ -245,8 +228,6 @@ def model_retrain(model, dataset_infos,
         mlflow.log_param(
             "Description", "RETRAIN - EfficientNetB0 - Détection d'anomalie pulmonaire")
         logger.info("Chargement des données")
-        # dataset_path=os.path.join(init_paths["main_path"],init_paths["processed_datasets_folder"],dataset_info["current_dataset_name"])
-        num_classes = 3  # Plus tard, récupération depuis le metadata.json
         dataset_path = dataset_infos["Chemin du Dataset"]
         logger.debug(f"Chemin du dataset {dataset_path}")
         logger.info("Preprocessing et labellisation X,y")
@@ -273,19 +254,6 @@ def model_retrain(model, dataset_infos,
         full_run_folder = os.path.join(
             init_paths["main_path"], init_paths["run_folder"])  # ./data/processed/mflow
         # ./data/processed/keras_tuner
-        '''
-        full_kt_folder = os.path.join(
-            init_paths["main_path"], init_paths["keras_tuner_folder"])
-        keras_tuning_history_filename = f"effnetb0_tuning_history_run_{run_id}.csv"
-        best_model, best_hp = build_model.tuner_randomsearch(
-            model_hp, full_run_folder, full_kt_folder, keras_tuning_history_filename, X_train, y_train, num_classes)
-
-        logger.debug(f"best_hp {best_hp.values}")
-        logger.debug("Enregistrement des meilleurs hyperparamètres")
-        for key, value in best_hp.values.items():
-            logger.debug(f"{key}: {value}")
-            mlflow.log_param(key, value)
-        '''
         logger.info(
             "Entrainement du MEILLEUR modèle sur 80p des données (60% train, 20% val)")
         model_training_history_csv = f"Covid19_3C_EffnetB0_model_history_run_{run_id}.csv"
@@ -330,12 +298,6 @@ def model_retrain(model, dataset_infos,
         mlflow.log_param("Dataset", dataset_infos["Dataset Name"])
         mlflow.log_artifact(dataset_path, artifact_path="Dataset")
 
-        '''
-        logger.debug(f"Model - Inférer la signature")
-        # Inférer la signature du modèle
-        signature = infer_signature(X_train, trained_model.predict(X_train))
-        logger.debug(f"Model - Signature {signature}")
-        '''
         # Enregistrement du modèle
         logger.info("Log du modèle")
         mlflow.keras.log_model(trained_model, "model")
@@ -449,141 +411,3 @@ def main(retrain=False,
     experiment_link = utils_models.get_mlflow_link(experiment_id, run_id)
 
     return run_id, model_name, model_version, experiment_link
-
-
-def main_V1(retrain=False,
-            model_name=None,
-            model_version=None,
-            include_prod_data=False,
-            balance=True,
-            dataset_version=None,
-            max_epochs=model_hp["max_epochs"],
-            num_trials=model_hp["num_trials"]):
-    logger.debug("model_tracking.main()")
-    logger.debug(f"model_hp {model_hp}")
-    logger.debug(f"retrain={retrain}, model_name={model_name}, model_version={model_version},include_prod_data={include_prod_data}, balance= {balance}, dataset_version={dataset_version},max_epochs={max_epochs},num_trials={num_trials}")
-
-    logger.debug(f"Initialisation du client MLFlow")
-
-    logger.debug(
-        f"Identification du scénario en fonction des valeurs renseignées")
-    if retrain:
-        logger.debug(f"Réentrainement du modèle")
-        if model_name is None:
-            logger.debug(
-                f"Modèle non renseigné - Réentrainement du modèle de production")
-            model, model_name, model_version = utils_models.get_mlflow_prod_model()
-            if model is None:
-                logger.error(f"Modèle de production non trouvé")
-            else:
-                logger.debug(
-                    f"Modèle à réentrainer {model_name}-{model_version} sur les données de production")
-        # SCENARIO 1 ici - Réentrainement modèle
-        logger.debug(
-            f"Début du réentrainement du Modèle {model_name}-{model_version} (Dernier modèle ou modèle renseigné)")
-        dataset_prod_infos = utils_data.get_latest_dataset_info("PROD")
-        logger.debug(f"dataset_prod_infos = {dataset_prod_infos}")
-        if dataset_prod_infos is None:
-            logger.error(f"Aucun Dataset de production trouvé")
-        dataset_path_prod = dataset_prod_infos["Chemin du Dataset"]
-        run_id, model_name, model_version, experiment_id = model_retrain(model, dataset_prod_infos,
-                                                                         model_name,
-                                                                         model_version,
-                                                                         max_epochs=model_hp["max_epochs"],
-                                                                         num_trials=model_hp["num_trials"],
-                                                                         experiment_name="Model Retraining"
-                                                                         )
-    else:
-        if dataset_version is None:
-            logger.debug(
-                f"Dataset non renseigné - Utilisation du dernier Dataset de Reference")
-            dataset_infos = utils_data.get_latest_dataset_info("REF")
-            if dataset_infos is None:
-                logger.error(f"Aucun Dataset trouvé")
-            else:
-                logger.debug(f"dataset_infos = {dataset_infos}")
-                dataset_version = dataset_infos["Dataset Name"]
-                logger.debug(f"Dataset à utiliser {dataset_version}")
-        else:
-            logger.debug(
-                f"Dataset renseigné {dataset_version}")
-            dataset_infos = utils_data.get_dataset_info_by_dataset_name(
-                dataset_version)
-            if dataset_info is None:
-                logger.error(f"Dataset {dataset_version} non trouvé")
-
-        logger.debug(
-            f"Entrainement d'un nouveau modèle (Dataset renseigné ou dernier dataset)")
-        if include_prod_data:
-            logger.debug(
-                f"Inclure data de PROD - Mettre d'abord à jour le dataset et récupérer la nouvelle version")
-            dataset_infos = update_dataset.update_dataset_ref(
-                dataset_infos["Chemin du Dataset"], "PROD")
-            dataset_version = dataset_infos["Dataset Version"]
-        else:
-            logger.debug(f"Ne pas inclure data de PROD")
-        # SCENARIO 2 ici - Entrainement modèle from scratch / Avec ou sans données de PROD, sur la version définie
-
-        run_id, model_name, model_version, experiment_id = model_tracking(
-            dataset_infos, balance, max_epochs, num_trials)
-    logger.info("Fin du processus")
-    logger.debug(
-        f"run_id {run_id} / model_name {model_name} / model_version {model_version}")
-    experiment_link = utils_models.get_mlflow_link(experiment_id, run_id)
-
-    return run_id, model_name, model_version, experiment_link
-
-
-def DELETE_main_init(dataset_version=None,
-                     max_epochs=model_hp["max_epochs"],
-                     num_trials=model_hp["num_trials"]):
-    logger.info("Début du processus")
-    logger.debug(f"dataset_version {dataset_version}")
-    if dataset_version is None:
-        logger.debug(
-            f" Pas de Dataset renseigné, entrainement avec le dernier dataset")
-        dataset_infos = utils_data.get_latest_dataset_info("REF")
-        dataset_version = dataset_infos["Dataset Name"]
-    run_id, model_name, model_version = model_tracking(
-        dataset_version, max_epochs, num_trials)
-    logger.info("Fin du processus")
-    logger.debug(
-        f"run_id {run_id} / model_name {model_name} / model_version {model_version}")
-    return run_id, model_name, model_version
-
-
-def DELETE_main_retrain():
-    logger.info("Début du processus de réentrainement")
-    # Récupération du dataset de production
-    dataset_path = os.path.join(
-        init_paths["main_path"], init_paths["prod_datasets_folder"], dataset_info["current_prod_dataset_folder"])
-    logger.debug(f"dataset_path = {dataset_path}")
-    # Récupération du modèle de production
-    model, model_name, model_version = utils_models.get_mlflow_prod_model_tensorflow()
-
-    logger.info("Fin du processus")
-    run_id, model_name, model_version = model_retrain(model, dataset_path,  model_name, model_version,
-                                                      max_epochs=model_hp["max_epochs"],
-                                                      num_trials=model_hp["num_trials"])
-
-    logger.debug(
-        f"run_id {run_id} / model_name {model_name} / model_version {str(model_version)}")
-    return run_id, model_name, model_version
-
-
-def DELETE_main_retrain_full_data():
-    logger.info("Début du processus de réentrainement FULL")
-    # Récupération du dataset de production
-    dataset_path = update_dataset.merge_datasets()
-    logger.debug(f"dataset_path = {dataset_path}")
-    # Récupération du modèle de production
-    model, model_name, model_version = utils_models.get_mlflow_prod_model_tensorflow()
-
-    logger.info("Fin du processus")
-    run_id, model_name, model_version = model_retrain(model, dataset_path, model_name, model_version,
-                                                      max_epochs=model_hp["max_epochs"],
-                                                      num_trials=model_hp["num_trials"])
-
-    logger.debug(
-        f"run_id {run_id} / model_name {model_name} / model_version {str(model_version)}")
-    return run_id, model_name, model_version

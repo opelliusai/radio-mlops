@@ -3,7 +3,7 @@ Créé le 08/08/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
 @summary: MLFlow Model Serving
--- Enregistrement local du modèle
+-- Déploiement du modèle sur MLFlow
 '''
 
 # Imports
@@ -14,14 +14,10 @@ import mlflow.keras
 from sklearn.metrics import f1_score
 from mlflow.tracking import MlflowClient
 
-import numpy as np
 # Import des fichiers de configuration et des informations sur les logs
-from src.config.run_config import init_paths, dataset_info, current_dataset_label_correspondance, model_hp, model_info, infolog, mlflow_info
-from src.utils import utils_data
+from src.config.run_config import model_info, mlflow_info
 from src.utils import utils_models
 # Import de modules internes: ici les modules liés à la construction /entrainement du modele
-from src.models import build_model, predict_model, train_model
-from src.datasets import image_preprocessing
 from src.config.log_config import setup_logging
 
 logger = setup_logging("MLFLOW")
@@ -36,7 +32,7 @@ mlflow.set_registry_uri(mlflow_uri)
 def model_version_serving(model_name=model_info["model_name_prefix"], num_version=2):
     logger.debug(
         f"---------model_version_serving(model_name={model_name},num_version={num_version})-----------")
-    # Archiver le modèle de production à l'état Staging avant de mettre un nouveau modèle en production
+    # Archiver le modèle de production à l'état Archived avant de mettre un nouveau modèle en production
     model_prod_version = utils_models.get_mlflow_prod_version()
     logger.debug(f"model_prod_version {model_prod_version}")
     if model_prod_version is not None:
@@ -88,7 +84,6 @@ def auto_model_serving(model_name=model_info["model_name_prefix"]):
     logger.debug(
         f"----------auto_model_serving(model_name={model_name})----------")
     # Récupérer tous les modèles enregistrés
-    # registered_models = client.search_registered_models()
     model_versions = client.search_model_versions(f"name='{model_name}'")
     logger.debug(f"model_versions {model_versions}")
     # Parcourir chaque modèle enregistré

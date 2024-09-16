@@ -34,9 +34,6 @@ app = FastAPI(
     version="0.1"
 )
 
-# Chargement des variables d'environnement
-# load_dotenv()
-
 # Définition des métriques Prometheus
 collector = CollectorRegistry()
 ADMIN_API_REQUEST_TIME = Summary(
@@ -166,8 +163,6 @@ async def train_model(retrain: bool = False,
     # combined : from scracth with New + current data
     # diff : Retrain current model with new data only
     """
-    # run_id, model_name, model_version = model_tracking.main(
-    # dataset_version, max_epochs, num_trials,)
     run_id, model_name, model_version, experiment_link = model_tracking.main(
         retrain, model_name, model_version, include_prod_data,
         balance, dataset_version, max_epochs, num_trials)

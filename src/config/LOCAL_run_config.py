@@ -104,7 +104,7 @@ model_info = {
 
 mlflow_info = {
     # "mlflow_tracking_uri": "http://127.0.0.1:8090",
-    "mlflow_tracking_uri": "http://mlflow:8090"
+    "mlflow_tracking_uri": "http://localhost:8090"
 }
 
 model_hp = {
@@ -125,7 +125,7 @@ drift_info = {
 
 user_api_info = {
     # "USER_API_URL": "http://127.0.0.1:8081",
-    "USER_API_URL": "http://user_api:8081",
+    "USER_API_URL": "http://localhost:8081",
     "PREDICT_URL": "/predict",
     "LOG_PREDICTION": "/update_log_prediction",
     "ADD_IMAGE": "/add_image",
@@ -136,7 +136,7 @@ user_api_info = {
 
 admin_api_info = {
     # "ADMIN_API_URL": "http://127.0.0.1:8082",
-    "ADMIN_API_URL": "http://admin_api:8082",
+    "ADMIN_API_URL": "http://localhost:8082",
     "DOWNLOAD_DATASET_URL": "/download_dataset",
     "CLEAN_DATASET_URL": "/clean_dataset",
     "UPDATE_DATASET_URL": "/update_dataset",
@@ -155,7 +155,7 @@ admin_api_info = {
 monitoring_api_info = {
     "URLS_PREFIX": "http://localhost",
     # "MONITORING_API_URL": "http://127.0.0.1:8083",
-    "MONITORING_API_URL": "http://monitoring_api:8083",
+    "MONITORING_API_URL": "http://localhost:8083",
     "DEPLOY_READY_MODEL": "/deploy_ready_model",
     "DRIFT_METRICS_URL": "/drift_metrics",
     "DRIFT_METRICS_URL_MODEL": "/model_drift_metrics",
@@ -181,12 +181,11 @@ infolog = {
     "logfile_prefix": "radio-mlops_",  # prefix pour le fichier de log par package src
 }
 
-
 urls_info = {
-    "USER_API_URL": "http://user_api:8081",
-    "ADMIN_API_URL": "http://admin_api:8082",
-    "MONITORING_API_URL": "http://monitoring_api:8083",
+    "USER_API_URL": "http://localhost:8081",
+    "ADMIN_API_URL": "http://localhost:8082",
+    "MONITORING_API_URL": "http://localhost:8083",
     "STREAMLIT_URL": "http://127.0.0.1:8501",
     "STREAMLIT_PRES_URL": "http://127.0.0.1:8502",
-    "MLFLOW_URL": "http://mlflow:8090"
+    "MLFLOW_URL": "http://localhost:8090"
 }

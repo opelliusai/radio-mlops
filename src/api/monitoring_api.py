@@ -3,8 +3,8 @@ Créé le 20/08/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
 @summary: API Drift Monitoring
--- Envoi des résultats de prédiction à Prometheus
--- Ensuite, on ajoute des seuils d'alerte côté prometheus
+-- Envoi des résultats de drift (data pour l'instant) à Prometheus
+-- Ces calculs de drift sont utilisés par les scripts de monitoring pour envoyer 
 '''
 
 # IMPORTS
@@ -175,15 +175,10 @@ async def model_drift_metrics(retrain: bool = False):
 
         logger.debug(
             f"Détection de Model drift - Réentrainement du modèle de Production")
-        # diff_run_id, model_name, diff_model_version, diff_experiment_link = model_tracking.main(
-        #    retrain=True)
         comb_run_id, model_name, comb_model_version, comb_experiment_link = model_tracking.main(
             include_prod_data=True)
         # combiné
-        retrain_content = {  # "status_retrain_diff": "Réentrainement du modèle avec les données de production terminé",
-            # "diff_run_id": diff_run_id,
-            # "diff_model_version": diff_model_version,
-            # "diff_experiment_link": diff_experiment_link,
+        retrain_content = {
             "status_retrain_comb": "Entrainement du modèle avec les données de référence et production terminé",
             "comb_run_id": comb_run_id,
             "comb_model_version": comb_model_version,
@@ -212,16 +207,8 @@ async def data_drift_metrics(retrain: bool = False):
     content = {"status": "Calcul terminé",
                "model_name": model_name,
                "drift": drift,
-               # "new_mean": new_mean.tolist(),
-               # "original_mean": original_mean.tolist(),
-               # "new_std": new_std.tolist(),
-               # "original_std": original_std.tolist(),
                "mean_diff": float(mean_diff),
                "std_diff": float(std_diff),
-               # "status_retrain_diff": "N/A",
-               # "diff_run_id": None,
-               # "diff_model_version": None,
-               # "diff_experiment_link": None,
                "status_retrain_comb": "N/A",
                "comb_run_id": None,
                "comb_model_version": None,
@@ -231,15 +218,10 @@ async def data_drift_metrics(retrain: bool = False):
 
         logger.debug(
             f"Détection de drift - Réentrainement du modèle de Production")
-        # diff_run_id, model_name, diff_model_version, diff_experiment_link = model_tracking.main(
-        #    retrain=True)
         comb_run_id, model_name, comb_model_version, comb_experiment_link = model_tracking.main(
             include_prod_data=True)
         # combiné
-        retrain_content = {  # "status_retrain_diff": "Réentrainement du modèle avec les données de production terminé",
-            # "diff_run_id": diff_run_id,
-            # "diff_model_version": diff_model_version,
-            # "diff_experiment_link": diff_experiment_link,
+        retrain_content = {
             "status_retrain_comb": "Entrainement du modèle avec les données de référence et production terminé",
             "comb_run_id": comb_run_id,
             "comb_model_version": comb_model_version,
@@ -256,8 +238,8 @@ async def data_drift_metrics(retrain: bool = False):
                         content=content)
 
 
-@ app.post("/train_model", summary="Entrainement d'un modèle",
-           description="Entrainement d'un modèle avec plusieurs options")
+@app.post("/train_model", summary="Entrainement d'un modèle",
+          description="Entrainement d'un modèle avec plusieurs options")
 async def train_model(retrain: bool = False,
                       model_name: str = None,
                       model_version: str = None,
@@ -288,8 +270,6 @@ async def train_model(retrain: bool = False,
     # combined : from scracth with New + current data
     # diff : Retrain current model with new data only
     """
-    # run_id, model_name, model_version = model_tracking.main(
-    # dataset_version, max_epochs, num_trials,)
     run_id, model_name, model_version, experiment_link = model_tracking.main(
         retrain, model_name, model_version, include_prod_data,
         balance, dataset_version, max_epochs, num_trials)

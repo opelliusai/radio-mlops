@@ -150,7 +150,6 @@ def add_one_image(image_path, pred_id, label="UNLABELED"):
         dataset_version = current_prod_dataset["Dataset Version"]
         dataset_description = current_prod_dataset["Description"]
 
-    # Copie du fichier selon le label indiqué
     # Copie de l'image dans un répertoire correspondant à son label
     rep = utils_data.remove_space_from_foldername(label)
     shutil.copy(image_path, os.path.join(dataset_path, rep))
@@ -394,19 +393,3 @@ def log_new_dataset(new_dataset_uid, source_type, new_ref_dataset_path, new_data
     df_ref_dataset.to_csv(ref_dataset_logging_path, index=False)
 
     logger.debug(f"Nouveau dataset loggé avec succès: {info_dataset}")
-
-
-# FONCTION MAIN pour une mise à jour d'un dataset de REF depuis KAGGLE ou PROD
-if __name__ == "__main__":
-    """
-
-    # Version KAGGLE
-    update_dataset_ref(None,
-                       source_type="KAGGLE", base_dataset_id=None)
-    # FIN VERSION KAGGLE
-    """
-
-    # Version PROD
-    # update_dataset_path = os.path.join(
-    update_dataset_ref(None,
-                       source_type="PROD", base_dataset_id=None)

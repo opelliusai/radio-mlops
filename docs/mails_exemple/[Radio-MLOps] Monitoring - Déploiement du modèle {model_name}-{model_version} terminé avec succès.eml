@@ -1,0 +1,78 @@
+Delivered-To: jelgasmi@gmail.com
+Received: by 2002:a50:9fa4:0:b0:5c4:100:e9dd with SMTP id c33csp1475263edf;
+        Mon, 16 Sep 2024 13:40:03 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHvKw2af9LGPPgE7EH0hqwRlampwCfPzvpsAUUdd0eqV1wCtSUbzPtH6eIZuPrp7sHRGH8C
+X-Received: by 2002:a05:620a:405:b0:7a9:bb25:d495 with SMTP id af79cd13be357-7a9e5fa1495mr2110922285a.50.1726519203688;
+        Mon, 16 Sep 2024 13:40:03 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1726519203; cv=none;
+        d=google.com; s=arc-20240605;
+        b=QMxyyc8JLjwskmzKICJLKk8wZKyQ4r5EdllPkN2U8N81ogZZEm5P/dBjb9zL5/GjZD
+         dr1gN1JtdWQKHsFLxHV0NfavhXyx+USLPbbfZbznQphvD/Hlw9/tUJ5QOHFlgxTyTeO8
+         Av+rcYw3IHTHcJftwPNpOIwwjOkUwv71RlnVq/I0Q32M6MARb4hzcjweOqLGPjc4MMtB
+         mYGCJ88I5GIq54gNpdx7xyR8wvuR0qsQvtfoRUVw2ANw4ImWVacM2uCF/fh8+KDuG+Qj
+         RA+gy/JXc62V0PAhFBKglMEYTp2KIxEi5obfhOfosGfQ320a7vUaKar5vtpHL3IpE3VU
+         7xmw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=message-id:date:to:from:subject:mime-version:dkim-signature;
+        bh=jXgk4mfC3mhcMwzCb6Pjf8yiwSl1ZtYGq90roXfUwfI=;
+        fh=Cl+SzEZOdNMXBDLOmJDZf7/2Nm31g0uXgMmWLW0Pk/c=;
+        b=IC1z8oJoCsE4k1WWGN4rA2dzFSi4GH3axIeBPwcWCmv/WbwbJJKZsjgDwCtt+vD1qU
+         EC7K9WjNxUsDCFrGM02VjA+ijkvEhFCEzVBjNhxUudKBHhkmH9kxUiMPBY9DnS3JLBhG
+         Ky28Spce/ytCQIWGMo91fHpBpD8jAUNUdoHWcGqoMCcRf6YB+nfr3TE4e4xTveaICIDg
+         DL1IK5B2Ay5gCTmKaJoQkr/Xy46qJVnxgya1zLObMa+jo8vbJF1ng36Jmk7huF4Gp+7Z
+         utyFba6htXF/xrRY3nzDPiKbBGE1cX3MM5KxDgCxFO2/Wr+tUVqGLu6EPc1rRLI0gNiw
+         gctg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@me.com header.s=1a1hai header.b=hnFhxXZc;
+       spf=pass (google.com: domain of jelgasmi@me.com designates 17.57.155.10 as permitted sender) smtp.mailfrom=jelgasmi@me.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=me.com
+Return-Path: <jelgasmi@me.com>
+Received: from qs51p00im-qukt01072101.me.com (qs51p00im-qukt01072101.me.com. [17.57.155.10])
+        by mx.google.com with ESMTPS id af79cd13be357-7ab3eb635d1si645918685a.416.2024.09.16.13.40.03
+        for <jelgasmi@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Sep 2024 13:40:03 -0700 (PDT)
+Received-SPF: pass (google.com: domain of jelgasmi@me.com designates 17.57.155.10 as permitted sender) client-ip=17.57.155.10;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@me.com header.s=1a1hai header.b=hnFhxXZc;
+       spf=pass (google.com: domain of jelgasmi@me.com designates 17.57.155.10 as permitted sender) smtp.mailfrom=jelgasmi@me.com;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=me.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=me.com; s=1a1hai;
+	t=1726519203; bh=jXgk4mfC3mhcMwzCb6Pjf8yiwSl1ZtYGq90roXfUwfI=;
+	h=Content-Type:MIME-Version:Subject:From:To:Date:Message-ID;
+	b=hnFhxXZcif+2s3xKEDeq/FRjsH1LI648PKQQGDNkb4EOJ/b4J+h0oOgvcg9ueQr8q
+	 KlmE81mUMwMzUUSnCPc89QKshIB0XwXhlnZW5qNJmfbpHC0yFxWWhobei1mr1FyxX7
+	 guucdQ159cjEWYl7KfTmkYlgAWPeVCtG8r/s2eyf9Zkr9uXxQ16Yi/VB/LTMuBZxU7
+	 35HcBiOmKxL95aUVmzJBoNwIiJKwkq4nop50G6y9zTBMHezPVIANMaXsM52ZofTrsi
+	 wmbM8RjcmzUslZDShCeuM/0lMmaXwLQTtB3FOHIEmphgffx6iKQxg+phMaF0xgILNG
+	 M/N1pE6hd6EQA==
+Received: from [172.20.0.6] (qs51p00im-dlb-asmtp-mailmevip.me.com [17.57.155.28])
+	by qs51p00im-qukt01072101.me.com (Postfix) with ESMTPSA id 90C394034A
+	for <jelgasmi@gmail.com>; Mon, 16 Sep 2024 20:40:02 +0000 (UTC)
+Content-Type: multipart/mixed; boundary="===============7050229376538319423=="
+MIME-Version: 1.0
+Subject: =?utf-8?q?=5BRadio-MLOps=5D_Monitoring_-_D=C3=A9ploiement_du_mod=C3=A8le_=7Bmodel=5Fname=7D-=7Bmodel=5Fversion=7D_termin=C3=A9_avec_succ=C3=A8s?=
+From: jelgasmi@me.com
+To: jelgasmi@gmail.com
+Date: Mon, 16 Sep 2024 20:40:00 +0000
+Message-ID: <41n4ev2bdt-1@pv51p00im-qukt20191301.me.com>
+X-Proofpoint-ORIG-GUID: kmc4t-xMmuCniMQOpJV5oVwhAbX1Y_wO
+X-Proofpoint-GUID: kmc4t-xMmuCniMQOpJV5oVwhAbX1Y_wO
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-16_15,2024-09-16_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 suspectscore=0
+ clxscore=1015 phishscore=0 malwarescore=0 spamscore=0 mlxlogscore=537
+ adultscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2308100000 definitions=main-2409160141
+
+--===============7050229376538319423==
+Content-Type: text/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+
+TGUgZMOpcGxvaWVtZW50IGR1IG1vZMOobGUgTUxPcHNfUmFkaW9fTW9kZWwtMiB0ZXJtaW7DqSBh
+dmVjIHN1Y2PDqHMgPGJyPiBMaWVuIE1MRmxvdyBBIHZlbmly
+
+--===============7050229376538319423==--

@@ -3,8 +3,7 @@ Créé le 08/09/2024
 
 @author: Jihane EL GASMI - MLOps Avril 2024
 @summary: Script monitoring - Déploiement de modèle
--- Déploie le modèle ayant un Tag 
---  
+-- Déploie le modèle ayant un Tag deploy_flag = production_ready
 
 '''
 from src.config.log_config import setup_logging
@@ -79,7 +78,3 @@ def deploy_ready_model():
         df_logging.to_csv(logging_path, index=False)
 
     return status, details, message_objet, html_message_corps
-
-
-if __name__ == "__main__":
-    services = deploy_ready_model()

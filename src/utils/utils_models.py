@@ -19,7 +19,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import shutil
 import csv
 import datetime
 import uuid
@@ -27,12 +26,9 @@ from mlflow.tracking import MlflowClient
 import mlflow
 # metrics
 from tensorflow.keras.losses import SparseCategoricalCrossentropy
-from keras.models import Model
 from sklearn.metrics import accuracy_score, recall_score, f1_score, classification_report, confusion_matrix
-import keras
 
 # Internal imports
-from src.datasets import image_preprocessing
 from src.utils import utils_data
 # Import des fichiers de configuration et des informations sur les logs
 from src.config.run_config import init_paths, model_info, mlflow_info, infolog
@@ -92,6 +88,7 @@ def save_prediction(model_name, image_path, prediction, confiance, temps_predict
 
 def save_model(model, save_path):
     """
+    (reprise projet github owl ml) 
     Saves a Keras model to the specified path.
 
     :param model: The model to save.
@@ -132,6 +129,7 @@ def save_model(model, save_path):
 
 def save_weights(model, save_path):
     """
+    (reprise projet github owl ml)
     Saves a Keras model to the specified path.
 
     :param model: The model to save.
@@ -210,6 +208,7 @@ def load_current_model():
 
 def save_history(history, save_path):
     """
+    (owl ml github)
     Saves a training history to a file, supporting both Pickle, JSON and CSV formats.
 
     uses pickle.dump or json.dump depending on the specified file path extension
@@ -264,6 +263,7 @@ def save_history(history, save_path):
 
 def load_history(load_path):
     """
+    (owl ml github)
     Loads a training history from a file, supporting both pickle and JSON formats.
     uses pickle.load or json.load depending on the specified file path extension
     :param load_path: The file path of the training history to load.
@@ -306,6 +306,7 @@ def load_history(load_path):
 
 def generate_training_plots(history_file, output_filepath, run_info):
     """
+    (owl ml github)
     Generates and saves training and validation loss and accuracy plots from a history file.
     The history file can be in PKL, CSV, or JSON format.
 
@@ -376,6 +377,7 @@ def generate_training_plots(history_file, output_filepath, run_info):
 
 def save_dataframe_plot(df, output_filepath, plot_type, labels_dict=None):
     """
+    (owl ml github)
     Generates and saves a plot based on the specified type, appending the plot type as a suffix to the run ID for the filename.
 
     :param df: DataFrame to be plotted, can be a confusion matrix or a classification report.
@@ -416,6 +418,7 @@ def save_dataframe_plot(df, output_filepath, plot_type, labels_dict=None):
 
 def get_prediction_metrics(model, X_eval, y_eval):
     """
+    (owl ml github)
     Calculates and logs various metrics for multiclass classification including accuracy, recall, F1-score,
     classification report, and confusion matrix, specifically for models trained with
     sparse categorical cross-entropy loss.
@@ -489,8 +492,6 @@ def get_mlflow_prod_model():
     logger.debug(
         f"Chargement du modèle de production {model_name}-{model_version}pour les predictions")
     model_uri = f"models:/{model_name}/Production"
-    # model = mlflow.pyfunc.load_model(
-    #    model_uri=model_uri)
     model = mlflow.tensorflow.load_model(model_uri=model_uri)
     logger.debug(f"Modele {model_name} chargé")
     return model, model_name, model_version
@@ -510,11 +511,11 @@ def get_mlflow_prod_model_tensorflow():
 def get_mlflow_prod_version():
     model_name = model_info["model_name_prefix"]
     logger.debug(f"model_name NAME {model_name}")
-    # Search for model versions with a specific name
+    # Recherche de modèles par nom
     filter_string = f"name='{model_info['model_name_prefix']}'"
     model_versions = client.search_model_versions(filter_string=filter_string)
 
-    # Filter the model versions based on the stage
+    # Filtre basé sur l'état actuel ici Production
     model_details = [
         version for version in model_versions if version.current_stage == "Production"]
 
@@ -544,11 +545,9 @@ def get_models(model_name=model_info["model_name_prefix"]):
         logger.debug(f"Experiment ID {experiment_id}")
         logger.debug(f"run_info {run_info}")
         logger.debug(f"RUN STATUS {run_info.get('STATUS')}")
-        # if run_info.status
         if model.status == "READY" and run_info.get("STATUS") == "active":
             logger.debug(f"Ready Model found {model.name} - {model.version}")
             logger.debug(f"Model RUN ID {model.run_id}")
-            # logger.debug(f"run_info {run_info}")
             runs_info.append(run_info)
             model_info = {}
             model_info["Name"] = model.name
@@ -566,20 +565,12 @@ def get_models(model_name=model_info["model_name_prefix"]):
             model_info["Durée"] = run_info["Durée"]
             model_info["Link"] = get_mlflow_link(
                 model_info["EXPERIMENT_ID"], model_info["RUN_ID"])
-            '''
-            model_info["Confusion Matrix"] = get_confusion_matrix_from_run(
-                model.run_id)
-            
-            model_info["Classification Report"] = get_classification_report_from_run(
-                model.run_id)
-            '''
             models_info.append(model_info)
     logger.debug(f"Model infos {models_info}")
     logger.debug(f"RUN infos {runs_info}")
     logger.debug(f"Type Model infos {type(models_info)}")
     logger.debug(f"Type RUN infos {type(runs_info)}")
 
-    # runs_info = get_runs_info(model_info["RUN"] for model_info in models_info)
     return models_info
 
 
@@ -593,11 +584,8 @@ def get_run_info(run_id):
     run = client.get_run(run_id=run_id)
     run_info = {}
     run_info["RUN_ID"] = run.info.run_id
-    # run_info["Nom"]=run.info.run_name
     run_info["EXPERIMENT_ID"] = run.info.experiment_id
     run_info["PARAMS"] = run.data.params
-    # run_info["ARTIFACTS"]=run.info.artifact_uri
-    # run_info["metrics"]=run.data.metrics
     logger.debug(f"run.info.end_time {run.info.end_time}")
     logger.debug(f"run.info.start_time {run.info.start_time}")
     if run.info.end_time is not None and run.info.start_time is not None:
@@ -633,7 +621,6 @@ def update_log_prediction(pred_id, label):
     df = pd.read_csv(pred_filepath)
 
     # Mise à jour de la valeur de prédiction validée
-    # logger.debug(f'Ancienne valeur {df.loc[df["UID"]==pred_id,"Prédiction validée"]}')
     logger.debug(
         f'Ancienne valeur {df.loc[df["UID"]==pred_id,"Prédiction validée"].fillna("N/A")}')
     df["Prédiction validée"] = df["Prédiction validée"].astype(str)
@@ -656,7 +643,7 @@ def save_drift_metrics(model_name, new_mean, original_mean, new_std, original_st
     ''' Mise à jour du fichier de prediction avec les informations recueillies'''
     logger.debug(
         f"-------save_drift_metrics(model_name={model_name}, new_mean={new_mean}, original_mean={original_mean}, new_std={new_std}, original_std={original_std}, drift={drift}, drift_calculation_date={drift_calculation_date}, temps_calcul={temps_calcul})----")
-    # Créer un dictionnaire avec les informations
+    # Création d'un dictionnaire avec les informations
     unique_id = str(uuid.uuid4())
     data = {
         'UID': unique_id,
@@ -696,7 +683,7 @@ def save_drift_metrics_model(model_name, recall_diff,
     ''' Mise à jour du fichier de prediction avec les informations recueillies'''
     logger.debug(
         f"-------save_drift_metrics(model_name={model_name}, recall_diff={recall_diff},drift={drift}, drift_calculation_date={drift_calculation_date}, temps_calcul={temps_calcul})----")
-    # Créer un dictionnaire avec les informations
+    # Création d'un dictionnaire avec les informations
     unique_id = str(uuid.uuid4())
     data = {
         'UID': unique_id,
@@ -720,7 +707,7 @@ def save_drift_metrics_model(model_name, recall_diff,
             logger.debug(
                 "Le fichier de logging existe, stockage des résultats en fin de fichier")
         logger.debug(f"Ecriture des résultats {data.values()}")
-        # Write the new data to the file
+        # Ecriture des données
         writer.writerow(data.values())
     return unique_id
 
@@ -730,7 +717,7 @@ def save_drift_metrics_data(model_name, new_mean, original_mean, new_std, origin
     ''' Mise à jour du fichier de prediction avec les informations recueillies'''
     logger.debug(
         f"-------save_drift_metrics_data(model_name={model_name}, new_mean={new_mean}, original_mean={original_mean}, new_std={new_std}, original_std={original_std}, drift={drift}, drift_calculation_date={drift_calculation_date}, temps_calcul={temps_calcul})----")
-    # Créer un dictionnaire avec les informations
+    # Création d'un dictionnaire avec les informations
     unique_id = str(uuid.uuid4())
     data = {
         'UID': unique_id,
@@ -760,7 +747,7 @@ def save_drift_metrics_data(model_name, new_mean, original_mean, new_std, origin
             logger.debug(
                 "Le fichier de logging existe, stockage des résultats en fin de fichier")
         logger.debug(f"Ecriture des résultats {data.values()}")
-        # Write the new data to the file
+        # Ecriture des données dans le fichier
         writer.writerow(data.values())
     return unique_id
 
@@ -811,7 +798,7 @@ def get_confusion_matrix_from_run(run_id, artifact_name='confusion_matrix.csv'):
 
     confusion_matrix_path = os.path.join(artifacts_uri, artifact_name)
 
-    # Télécharger le fichier CSV de la matrice de confusion
+    # Télécharge le fichier CSV de la matrice de confusion
     df_confusion_matrix = pd.read_csv(confusion_matrix_path)
 
     return df_confusion_matrix
@@ -835,12 +822,12 @@ def get_classification_report_from_run(run_id, artifact_name='classification_rep
 
     logger.debug(f"classification_report_path {classification_report_path}")
 
-    # Télécharger le fichier JSON du rapport de classification
+    # Téléchargement du fichier JSON du rapport de classification
 
     with open(classification_report_path, 'r') as f:
         classification_report = json.load(f)
 
-    # Convertir le rapport de classification en DataFrame
+    # Conversion du rapport de classification en DataFrame
     df_classification_report = pd.DataFrame(classification_report).transpose()
 
     return df_classification_report

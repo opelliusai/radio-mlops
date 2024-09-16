@@ -19,9 +19,8 @@ import os
 # Imports internes
 from src.utils import utils_data, utils_models
 from src.datasets import image_preprocessing
-from src.config.run_config import init_paths, dataset_info
+from src.config.run_config import init_paths
 from src.config.log_config import setup_logging
-# Redirection vers le fichier de log radio-mlops_datasets.log
 logger = setup_logging("datasets")
 
 # FONCTIONS
@@ -70,7 +69,6 @@ def prepare_dataset_for_model(dataset_infos, model_name):
             writer = csv.DictWriter(csvfile_out, fieldnames=fieldnames)
             writer.writeheader()
             # Initialisation des compteurs
-            # Initialisation des compteurs
             compteur_classe = {classe.strip(
                 "'"): 0 for classe in nb_image_par_classe.keys()}
 
@@ -94,7 +92,7 @@ def prepare_dataset_for_model(dataset_infos, model_name):
 
 def main_prepare():
     logger.debug(
-        f"---------image_preprocessing.py----Fonction  main_dataset_model()")
+        f"---------image_preprocessing.py----Fonction  main_prepare()")
     try:
         dataset_infos = utils_data.get_latest_dataset_info("REF")
         dataset_path = dataset_infos["Chemin du Dataset"]
