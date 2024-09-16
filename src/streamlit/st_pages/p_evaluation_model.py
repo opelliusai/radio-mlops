@@ -17,16 +17,11 @@ logger = setup_logging("STREAMLIT_ADMIN")
 def main(title, cookies):
     st.header(title)
     drift_filepath = os.path.join(
-        init_paths["main_path"], init_paths["data_drift_folder"], model_info["DATA_DRIFT_logging_filename"])
+        init_paths["main_path"], init_paths["model_drift_folder"], model_info["MODEL_DRIFT_logging_filename"])
     st.subheader("Historique des drift")
     if os.path.exists(drift_filepath):
         data_drift = pd.read_csv(drift_filepath, sep=",")
         data_drift = data_drift.drop("UID", axis=1)
-        data_drift = data_drift.drop("New Mean", axis=1)
-        data_drift = data_drift.drop("Original Mean", axis=1)
-        data_drift = data_drift.drop("Original", axis=1)
-        data_drift = data_drift.drop("New STD", axis=1)
-        data_drift = data_drift.drop("Original STD", axis=1)
         data_drift['Drift'] = data_drift['Drift'].map(
             {True: 'OUI', False: 'NON'})
         st.dataframe(data_drift.reset_index(drop=True), hide_index=True)
@@ -37,15 +32,14 @@ def main(title, cookies):
     retrain = st.checkbox("Avec réentrainement en cas de drift")
 
     if st.button("Lancer un calcul de drift"):
-        status, model_name, drift, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link = utils_streamlit.lancer_drift_detection(
+        status, model_name, recall_diff, drift, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link = utils_streamlit.lancer_drift_detection_model(
             retrain)
 
         if retrain:
             st.write('Infos réentrainement du modèle')
-            st.write(f"Statut: {status_retrain_diff}")
+            st.write(f"Statut: {status_retrain_comb}")
             data_train = {
                 'Type': ['Run ID', 'Model Name', 'Version', "Lien Experiment"],
-                'DIFF': [diff_run_id, model_name, diff_model_version, diff_experiment_link],
                 'Combiné': [comb_run_id, model_name, comb_model_version, comb_experiment_link]
             }
             logger.debug(f"data_train {data_train}")
@@ -54,8 +48,8 @@ def main(title, cookies):
 
         st.success("Calcul de Drift exécuté")
         data = {
-            'Nom': ['status', 'model_name', 'drift', 'mean_diff', 'std_diff'],
-            'Valeur': [status, model_name, "OUI" if drift == True else "NON", mean_diff, std_diff]
+            'Nom': ['status', 'model_name', 'recall_diff', 'drift'],
+            'Valeur': [status, model_name, recall_diff, "OUI" if drift == True else "NON"]
         }
         df = pd.DataFrame(data)
 

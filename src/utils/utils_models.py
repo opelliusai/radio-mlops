@@ -672,7 +672,81 @@ def save_drift_metrics(model_name, new_mean, original_mean, new_std, original_st
         'Date de calcul': drift_calculation_date,
         'Temps de calcul': temps_calcul
     }
-    drift_filepath = utils_data.get_logging_path("DRIFT")
+    drift_filepath = utils_data.get_logging_path("DRIFT_DATA")
+    logger.debug(f"Drift filepath {drift_filepath}")
+    file_exists = os.path.isfile(drift_filepath)
+    with open(drift_filepath, 'a' if file_exists else 'w', newline='') as f:
+        writer = csv.writer(f)
+        # Si le fichier n'existe pas, on ajoute l'entête
+        if not file_exists:
+            logger.debug(f"Fichier de logging n'existe pas")
+            logger.debug(f"Ecriture de l'entête {data.keys()}")
+            writer.writerow(data.keys())
+        else:
+            logger.debug(
+                "Le fichier de logging existe, stockage des résultats en fin de fichier")
+        logger.debug(f"Ecriture des résultats {data.values()}")
+        # Write the new data to the file
+        writer.writerow(data.values())
+    return unique_id
+
+
+def save_drift_metrics_model(model_name, recall_diff,
+                             drift, drift_calculation_date, temps_calcul):
+    ''' Mise à jour du fichier de prediction avec les informations recueillies'''
+    logger.debug(
+        f"-------save_drift_metrics(model_name={model_name}, recall_diff={recall_diff},drift={drift}, drift_calculation_date={drift_calculation_date}, temps_calcul={temps_calcul})----")
+    # Créer un dictionnaire avec les informations
+    unique_id = str(uuid.uuid4())
+    data = {
+        'UID': unique_id,
+        'Nom du modèle': model_name,
+        'RECALL Diff': recall_diff,
+        'Drift': drift,
+        'Date de calcul': drift_calculation_date,
+        'Temps de calcul': temps_calcul
+    }
+    drift_filepath = utils_data.get_logging_path("DRIFT_MODEL")
+    logger.debug(f"Drift filepath {drift_filepath}")
+    file_exists = os.path.isfile(drift_filepath)
+    with open(drift_filepath, 'a' if file_exists else 'w', newline='') as f:
+        writer = csv.writer(f)
+        # Si le fichier n'existe pas, on ajoute l'entête
+        if not file_exists:
+            logger.debug(f"Fichier de logging n'existe pas")
+            logger.debug(f"Ecriture de l'entête {data.keys()}")
+            writer.writerow(data.keys())
+        else:
+            logger.debug(
+                "Le fichier de logging existe, stockage des résultats en fin de fichier")
+        logger.debug(f"Ecriture des résultats {data.values()}")
+        # Write the new data to the file
+        writer.writerow(data.values())
+    return unique_id
+
+
+def save_drift_metrics_data(model_name, new_mean, original_mean, new_std, original_std, mean_diff, std_diff,
+                            drift, drift_calculation_date, temps_calcul):
+    ''' Mise à jour du fichier de prediction avec les informations recueillies'''
+    logger.debug(
+        f"-------save_drift_metrics_data(model_name={model_name}, new_mean={new_mean}, original_mean={original_mean}, new_std={new_std}, original_std={original_std}, drift={drift}, drift_calculation_date={drift_calculation_date}, temps_calcul={temps_calcul})----")
+    # Créer un dictionnaire avec les informations
+    unique_id = str(uuid.uuid4())
+    data = {
+        'UID': unique_id,
+        'Nom du modèle': model_name,
+        'New Mean': new_mean,
+        'Original Mean': original_mean,
+        'Original': original_mean,
+        'New STD': new_std,
+        'Original STD': original_std,
+        'Mean Diff': mean_diff,
+        'STD Diff': std_diff,
+        'Drift': drift,
+        'Date de calcul': drift_calculation_date,
+        'Temps de calcul': temps_calcul
+    }
+    drift_filepath = utils_data.get_logging_path("DRIFT_DATA")
     logger.debug(f"Drift filepath {drift_filepath}")
     file_exists = os.path.isfile(drift_filepath)
     with open(drift_filepath, 'a' if file_exists else 'w', newline='') as f:
@@ -695,11 +769,12 @@ def archive_model_pred_drift_logs(model_name):
     logger.debug(
         f"-------archive_model_pred_drift_logs(model_name={model_name})----")
     prediction_logging_filepath = utils_data.get_logging_path("PRED")
-    drift_filepath = utils_data.get_logging_path("DRIFT")
+    drift_model_filepath = utils_data.get_logging_path("DRIFT_MODEL")
+    drift_data_filepath = utils_data.get_logging_path("DRIFT_DATA")
 
     logger.debug(f"Prediction logging filepath {prediction_logging_filepath}")
-    logger.debug(f"drift logging filepath {drift_filepath}")
-
+    logger.debug(f"drift model logging filepath {drift_model_filepath}")
+    logger.debug(f"drift data logging filepath {drift_data_filepath}")
     # Renommer le fichier de prédiction si le fichier existe
     if os.path.exists(prediction_logging_filepath):
         predict_log_filename = os.path.basename(prediction_logging_filepath)
@@ -708,11 +783,18 @@ def archive_model_pred_drift_logs(model_name):
                                f"{model_name}_{predict_log_filename}"))
 
     # Renommer le fichier de Drift si le fichier existe
-    if os.path.exists(drift_filepath):
-        drift_filename = os.path.basename(drift_filepath)
+    if os.path.exists(drift_model_filepath):
+        drift_filename = os.path.basename(drift_model_filepath)
         # Renommer le fichier de dérive
-        os.rename(drift_filepath,
+        os.rename(drift_model_filepath,
                   os.path.join(init_paths["model_drift_folder"],
+                               f"{model_name}_{drift_filename}"))
+
+    if os.path.exists(drift_data_filepath):
+        drift_filename = os.path.basename(drift_data_filepath)
+        # Renommer le fichier de dérive
+        os.rename(drift_data_filepath,
+                  os.path.join(init_paths["data_drift_folder"],
                                f"{model_name}_{drift_filename}"))
 
 

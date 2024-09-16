@@ -17,7 +17,7 @@ import uvicorn
 # Imports internes
 from src.config.log_config import setup_logging
 from src.config.run_config import model_hp
-from src.models import model_drift_detection
+from src.models import data_drift_detection, model_drift_detection
 from src.mlflow import model_serving, model_tracking
 # Redirection vers le fichier de log radio-mlops_monitoring_api.log
 logger = setup_logging("monitoring_api")
@@ -103,7 +103,107 @@ async def deploy_ready_model():
 @app.post("/drift_metrics", summary="Calcul des Drift metrics", description="Lancement du calcul des métriques pour la détection de drift")
 async def drift_metrics(retrain: bool = False):
     # 1 - Lancement du calcul des métriques
-    model_name, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, drift = model_drift_detection.drift_detection_main()
+    model_name, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, drift = data_drift_detection.drift_detection_main()
+    logger.debug(
+        f"Data Calcul Drift : {model_name, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, drift}")
+    # Mettre à jour les métriques Prometheus
+    MEAN_DIFF_GAUGE.set(mean_diff)
+    STD_DIFF_GAUGE.set(std_diff)
+    content = {"status": "Calcul terminé",
+               "model_name": model_name,
+               "drift": drift,
+               # "new_mean": new_mean.tolist(),
+               # "original_mean": original_mean.tolist(),
+               # "new_std": new_std.tolist(),
+               # "original_std": original_std.tolist(),
+               "mean_diff": float(mean_diff),
+               "std_diff": float(std_diff),
+               # "status_retrain_diff": "N/A",
+               # "diff_run_id": None,
+               # "diff_model_version": None,
+               # "diff_experiment_link": None,
+               "status_retrain_comb": "N/A",
+               "comb_run_id": None,
+               "comb_model_version": None,
+               "comb_experiment_link": None
+               }
+    if retrain == True and drift == True:
+
+        logger.debug(
+            f"Détection de drift - Réentrainement du modèle de Production")
+        # diff_run_id, model_name, diff_model_version, diff_experiment_link = model_tracking.main(
+        #    retrain=True)
+        comb_run_id, model_name, comb_model_version, comb_experiment_link = model_tracking.main(
+            include_prod_data=True)
+        # combiné
+        retrain_content = {  # "status_retrain_diff": "Réentrainement du modèle avec les données de production terminé",
+            # "diff_run_id": diff_run_id,
+            # "diff_model_version": diff_model_version,
+            # "diff_experiment_link": diff_experiment_link,
+            "status_retrain_comb": "Entrainement du modèle avec les données de référence et production terminé",
+            "comb_run_id": comb_run_id,
+            "comb_model_version": comb_model_version,
+            "comb_experiment_link": comb_experiment_link
+        }
+        logger.debug(
+            f"Data Retrain/Train Model : {retrain_content}")
+
+        content.update(retrain_content)
+    logger.debug(f"Contenu final")
+    logger.debug(f"{content}")
+
+    return JSONResponse(status_code=200,
+                        content=content)
+
+
+@app.post("/model_drift_metrics", summary="Calcul des Drift metrics", description="Lancement du calcul des métriques pour la détection de drift")
+async def model_drift_metrics(retrain: bool = False):
+    # 1 - Lancement du calcul des métriques
+    recall_mean_diff, drift = model_drift_detection.drift_detection_main()
+    logger.debug(
+        f"Data Calcul Drift : {recall_mean_diff, drift}")
+    # Mettre à jour les métriques Prometheus
+    content = {"status": "Calcul terminé",
+               "drift": drift,
+               "recall_mean_diff": recall_mean_diff,
+               "status_retrain_comb": "N/A",
+               "comb_run_id": None,
+               "comb_model_version": None,
+               "comb_experiment_link": None
+               }
+    if retrain == True and drift == True:
+
+        logger.debug(
+            f"Détection de Model drift - Réentrainement du modèle de Production")
+        # diff_run_id, model_name, diff_model_version, diff_experiment_link = model_tracking.main(
+        #    retrain=True)
+        comb_run_id, model_name, comb_model_version, comb_experiment_link = model_tracking.main(
+            include_prod_data=True)
+        # combiné
+        retrain_content = {  # "status_retrain_diff": "Réentrainement du modèle avec les données de production terminé",
+            # "diff_run_id": diff_run_id,
+            # "diff_model_version": diff_model_version,
+            # "diff_experiment_link": diff_experiment_link,
+            "status_retrain_comb": "Entrainement du modèle avec les données de référence et production terminé",
+            "comb_run_id": comb_run_id,
+            "comb_model_version": comb_model_version,
+            "comb_experiment_link": comb_experiment_link
+        }
+        logger.debug(
+            f"Data Retrain/Train Model : {retrain_content}")
+
+        content.update(retrain_content)
+    logger.debug(f"Contenu final")
+    logger.debug(f"{content}")
+
+    return JSONResponse(status_code=200,
+                        content=content)
+
+
+@app.post("/data_drift_metrics", summary="Calcul des Drift metrics", description="Lancement du calcul des métriques pour la détection de drift")
+async def data_drift_metrics(retrain: bool = False):
+    # 1 - Lancement du calcul des métriques
+    model_name, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, drift = data_drift_detection.drift_detection_main()
     logger.debug(
         f"Data Calcul Drift : {model_name, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, drift}")
     # Mettre à jour les métriques Prometheus

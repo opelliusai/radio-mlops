@@ -1,6 +1,6 @@
 import streamlit as st
 from src.utils import utils_streamlit
-from src.streamlit.st_pages import p_predict, p_user_predictions, p_contribution, p_services, p_performance, p_evaluation, p_training, tests, p_models
+from src.streamlit.st_pages import p_predict, p_user_predictions, p_evaluation_model, p_contribution, p_services, p_performance, p_evaluation, p_training, p_models
 from streamlit_cookies_manager import EncryptedCookieManager
 
 # Titre du menu latéral
@@ -89,14 +89,14 @@ def main():
             p_services.main(page, cookies)
         elif page == "Performance du modèle de Production" and cookies.get('user_role') == 'admin':
             p_performance.main(page, cookies)
-        elif page == "Evaluation du modèle de Production" and cookies.get('user_role') == 'admin':
+        elif page == "Evaluation data drift" and cookies.get('user_role') == 'admin':
             p_evaluation.main(page, cookies)
+        elif page == "Evaluation model drift" and cookies.get('user_role') == 'admin':
+            p_evaluation_model.main(page, cookies)
         elif page == "Entrainement/Réentrainement" and cookies.get('user_role') == 'admin':
             p_training.main(page, cookies)
         elif page == "Informations et déploiement de modèles" and cookies.get('user_role') == 'admin':
             p_models.main(page, cookies)
-        elif page == "Tests":
-            tests.main(page, cookies)
 
 
 def get_menu_list(user_role):
@@ -108,7 +108,8 @@ def get_menu_list(user_role):
                      "Contribution",
                      "Etat des services",
                      "Performance du modèle de Production",
-                     "Evaluation du modèle de Production",
+                     "Evaluation data drift",
+                     "Evaluation model drift",
                      "Entrainement/Réentrainement",
                      "Informations et déploiement de modèles"]
     elif user_role == 'user':
@@ -116,8 +117,7 @@ def get_menu_list(user_role):
         app_pages = ["Mon compte",
                      "Demande d'analyse",
                      "Mes analyses",
-                     "Contribution",
-                     "Tests"]
+                     "Contribution"]
 
     return app_pages
 

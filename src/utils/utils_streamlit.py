@@ -78,7 +78,13 @@ API_MONITORING_URL = monitoring_api_info["MONITORING_API_URL"]
 API_URL_DRIFT_METRICS = API_MONITORING_URL + \
     monitoring_api_info["DRIFT_METRICS_URL"]
 logger.debug(f"API_URL_DRIFT_METRICS : {API_URL_DRIFT_METRICS}")
+API_URL_DRIFT_METRICS_MODEL = API_MONITORING_URL + \
+    monitoring_api_info["DRIFT_METRICS_URL_MODEL"]
+logger.debug(f"API_URL_DRIFT_METRICS : {API_URL_DRIFT_METRICS_MODEL}")
 
+API_URL_DRIFT_METRICS_DATA = API_MONITORING_URL + \
+    monitoring_api_info["DRIFT_METRICS_URL_DATA"]
+logger.debug(f"API_URL_DRIFT_METRICS : {API_URL_DRIFT_METRICS_DATA}")
 # Utils USER
 
 
@@ -329,11 +335,11 @@ def admin_ajout_images(images_labels):
 def lancer_drift_detection(retrain=False):
     logger.debug(f"----------------lancer_drift_detection()------------")
 
-    logger.debug(f"drift_metrics_launch_url = {API_URL_DRIFT_METRICS}")
+    logger.debug(f"drift_metrics_launch_url = {API_URL_DRIFT_METRICS_DATA}")
     data = {
         "retrain": retrain
     }
-    response = requests.post(API_URL_DRIFT_METRICS, params=data)
+    response = requests.post(API_URL_DRIFT_METRICS_DATA, params=data)
 
     if response.status_code == 200:
         status = response.json().get("status")
@@ -364,6 +370,41 @@ def lancer_drift_detection(retrain=False):
         logger.debug(f"comb_model_version = {comb_model_version}")
         logger.debug(f"comb_experiment_link = {comb_experiment_link}")
         return status, model_name, drift, mean_diff, std_diff, status_retrain_diff, diff_run_id, diff_model_version, diff_experiment_link, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link
+
+    else:
+        print(f"Erreur : {response.status_code} - {response.json()}")
+        return None
+
+
+def lancer_drift_detection_model(retrain=False):
+    logger.debug(f"----------------lancer_drift_detection_model()------------")
+
+    logger.debug(
+        f"drift_metrics_model_launch_url = {API_URL_DRIFT_METRICS_MODEL}")
+    data = {
+        "retrain": retrain
+    }
+    response = requests.post(API_URL_DRIFT_METRICS_MODEL, params=data)
+
+    if response.status_code == 200:
+        status = response.json().get("status")
+        model_name = response.json().get("model_name")
+        drift = response.json().get('drift')
+        recall_diff = response.json().get('recall_diff')
+        status_retrain_comb = response.json().get('status_retrain_comb')
+        comb_run_id = response.json().get('comb_run_id')
+        comb_model_version = response.json().get('comb_model_version')
+        comb_experiment_link = response.json().get('comb_experiment_link')
+
+        logger.debug(f"status = {status}")
+        logger.debug(f"model_name = {model_name}")
+        logger.debug(f"drift = {drift}")
+        logger.debug(f"recall_diff = {recall_diff}")
+        logger.debug(f"status_retrain_comb = {status_retrain_comb}")
+        logger.debug(f"comb_run_id = {comb_run_id}")
+        logger.debug(f"comb_model_version = {comb_model_version}")
+        logger.debug(f"comb_experiment_link = {comb_experiment_link}")
+        return status, model_name, drift, recall_diff, status_retrain_comb, comb_run_id, comb_model_version, comb_experiment_link
 
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")

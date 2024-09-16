@@ -8,6 +8,7 @@ Créé le 06/08/2024
 -- sauvegarde/chargement des résultats d'un modèle (historique, training plots)
 
 '''
+import numpy as np
 from collections import defaultdict
 import math
 import os
@@ -35,6 +36,19 @@ def label_to_numeric(labels, correspondance):
     return res
 
 
+def label_to_numeric_np(labels, correspondance):
+    '''
+    Convertit les labels (np.array) en valeurs numériques en utilisant une correspondance donnée.
+    '''
+    # Extraire les clés et valeurs de la correspondance
+    unique_labels = np.array(list(correspondance.keys()))
+    numeric_values = np.array(list(correspondance.values()))
+
+    # Utiliser numpy pour associer chaque label à sa valeur numérique
+    indices = np.searchsorted(unique_labels, labels)
+    return numeric_values[indices]
+
+
 def numeric_to_label(numbers, correspondance):
     '''
     Convertit les valeurs numériques en labels en utilisant une correspondance donnée.
@@ -45,7 +59,7 @@ def numeric_to_label(numbers, correspondance):
     logger.debug(f"res={res}")
     return res
 
-import numpy as np
+
 def generate_numeric_correspondance(labels):
     '''
     Génère une correspondance entre les labels et des valeurs numériques uniques.
@@ -649,7 +663,11 @@ def get_logging_path(type="REF"):
         logging_path = os.path.join(
             init_paths["main_path"], init_paths["PRED_logging_folder"], model_info["PRED_logging_filename"])
         logger.debug(f"logging_path : {logging_path}")
-    elif type.lower() == "drift":
+    elif type.lower() == "drift_data":
+        logging_path = os.path.join(
+            init_paths["main_path"], init_paths["data_drift_folder"], model_info["DATA_DRIFT_logging_filename"])
+        logger.debug(f"logging_path : {logging_path}")
+    elif type.lower() == "drift_model":
         logging_path = os.path.join(
             init_paths["main_path"], init_paths["model_drift_folder"], model_info["MODEL_DRIFT_logging_filename"])
         logger.debug(f"logging_path : {logging_path}")
