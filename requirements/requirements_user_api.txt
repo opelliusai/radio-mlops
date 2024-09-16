@@ -11,3 +11,4 @@ pydantic
 PyJWT
 prometheus-client
 seaborn
+keras-tuner

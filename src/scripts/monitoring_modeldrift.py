@@ -11,7 +11,6 @@ from src.config.log_config import setup_logging
 import requests
 import pandas as pd
 import os
-import streamlit as st
 # Import des fichiers de configuration et des informations sur les logs
 from src.config.run_config import init_paths
 from src.config.run_config import monitoring_api_info
@@ -37,7 +36,7 @@ def model_drift_metrics():
     logger.debug(f"model_drift_metrics = {API_URL_DRIFT_METRICS_URL}")
 
     response = requests.get(API_URL_DRIFT_METRICS_URL)
-
+    drift_status = "OK"
     if response.status_code == 200:
         status = response.json().get("status")
         model_name = response.json().get("model_name")
@@ -60,6 +59,7 @@ def model_drift_metrics():
         diff_run_id, diff_model_name, diff_model_version, comb_run_id, comb_model_name, comb_model_version = "na", "na", "na", "na", "na", "na"
         # Lancer un réentrainement si drift est true
         if drift == True:
+            drift_status = "KO"
             logger.debug(f"Drift détecté - Lancement d'un réentrainement DIFF")
             # diff_run_id, diff_model_name, diff_model_version = admin_retrain_model(option="diff")
             logger.debug(
@@ -68,6 +68,57 @@ def model_drift_metrics():
         else:
             logger.debug("Pas de drift détecté - Pas de réentrainement")
         return status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, diff_run_id, diff_model_name, diff_model_version, comb_run_id, comb_model_name, comb_model_version
+    else:
+        print(f"Erreur : {response.status_code} - {response.json()}")
+        return None
+
+
+def data_drift_metrics_mailing():
+    """
+    Fait appel à l'API de monitoring pour détecter un model drift
+    """
+    logger.debug(
+        f"----model_drift_metrics()---")
+    logger.debug(f"model_drift_metrics = {API_URL_DRIFT_METRICS_URL}")
+
+    response = requests.post(API_URL_DRIFT_METRICS_URL)
+    logger.debug(f"Response {response}")
+    drift_status = "OK"
+    message_objet = None
+    html_message_corps = None
+    if response.status_code == 200:
+        status = response.json().get("status")
+        model_name = response.json().get("model_name")
+        drift = response.json().get('drift')
+        mean_diff = response.json().get('mean_diff')
+        std_diff = response.json().get('std_diff')
+        logger.debug(f"status = {status}")
+        logger.debug(f"model_name = {model_name}")
+        logger.debug(f"drift = {drift}")
+        logger.debug(f"mean_diff = {mean_diff}")
+        logger.debug(f"std_diff = {std_diff}")
+        diff_run_id, diff_model_name, diff_model_version, comb_run_id, comb_model_name, comb_model_version = "na", "na", "na", "na", "na", "na"
+        # Lancer un réentrainement si drift est true
+        if drift == True:
+            drift_status = "KO"
+            logger.debug(
+                f"Drift détecté - Lancement d'un réentrainement COMBINED")
+            # comb_run_id, comb_model_name, comb_model_version = admin_retrain_model(option="combined")
+        else:
+            logger.debug("Pas de drift détecté - Pas de réentrainement")
+
+        if status == "KO":
+            message_objet = "[Radio-MLOps] Monitoring - Model DRIFT Détecté "
+            html_message_corps = f"Le monitoring a détecté un drift sur le modèle de Production <br>"
+            html_message_corps += f"<br>Modèle : {model_name}<br>"
+            html_message_corps += f"<br>Drift : {drift}<br>"
+            html_message_corps += f"<br>Différence de moyenne : {mean_diff}<br>"
+            html_message_corps += f"<br>Différence d'écart-type : {std_diff}<br>"
+        logger.debug(f"status - {status}")
+        logger.debug(f"message_objet - {message_objet}")
+        logger.debug(f"html_message_corps - {html_message_corps}")
+        return drift_status, message_objet, html_message_corps
+        # return status, model_name, drift, new_mean, original_mean, new_std, original_std, mean_diff, std_diff, diff_run_id, diff_model_name, diff_model_version, comb_run_id, comb_model_name, comb_model_version
     else:
         print(f"Erreur : {response.status_code} - {response.json()}")
         return None

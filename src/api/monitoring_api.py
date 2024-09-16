@@ -118,10 +118,10 @@ async def drift_metrics(retrain: bool = False):
                # "original_std": original_std.tolist(),
                "mean_diff": float(mean_diff),
                "std_diff": float(std_diff),
-               "status_retrain_diff": "N/A",
-               "diff_run_id": None,
-               "diff_model_version": None,
-               "diff_experiment_link": None,
+               # "status_retrain_diff": "N/A",
+               # "diff_run_id": None,
+               # "diff_model_version": None,
+               # "diff_experiment_link": None,
                "status_retrain_comb": "N/A",
                "comb_run_id": None,
                "comb_model_version": None,
@@ -131,20 +131,20 @@ async def drift_metrics(retrain: bool = False):
 
         logger.debug(
             f"Détection de drift - Réentrainement du modèle de Production")
-        diff_run_id, model_name, diff_model_version, diff_experiment_link = model_tracking.main(
-            retrain=True)
+        # diff_run_id, model_name, diff_model_version, diff_experiment_link = model_tracking.main(
+        #    retrain=True)
         comb_run_id, model_name, comb_model_version, comb_experiment_link = model_tracking.main(
             include_prod_data=True)
         # combiné
-        retrain_content = {"status_retrain_diff": "Réentrainement du modèle avec les données de production terminé",
-                           "diff_run_id": diff_run_id,
-                           "diff_model_version": diff_model_version,
-                           "diff_experiment_link": diff_experiment_link,
-                           "status_retrain_comb": "Entrainement du modèle avec les données de référence et production terminé",
-                           "comb_run_id": comb_run_id,
-                           "comb_model_version": comb_model_version,
-                           "comb_experiment_link": comb_experiment_link
-                           }
+        retrain_content = {  # "status_retrain_diff": "Réentrainement du modèle avec les données de production terminé",
+            # "diff_run_id": diff_run_id,
+            # "diff_model_version": diff_model_version,
+            # "diff_experiment_link": diff_experiment_link,
+            "status_retrain_comb": "Entrainement du modèle avec les données de référence et production terminé",
+            "comb_run_id": comb_run_id,
+            "comb_model_version": comb_model_version,
+            "comb_experiment_link": comb_experiment_link
+        }
         logger.debug(
             f"Data Retrain/Train Model : {retrain_content}")
 

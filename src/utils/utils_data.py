@@ -45,13 +45,35 @@ def numeric_to_label(numbers, correspondance):
     logger.debug(f"res={res}")
     return res
 
-
+import numpy as np
 def generate_numeric_correspondance(labels):
     '''
     Génère une correspondance entre les labels et des valeurs numériques uniques.
     '''
     logger.debug(f"---------generate_numeric_correspondance(labels={labels})")
     unique_labels = list(set(labels))
+    logger.debug(f"Unique labels {unique_labels}")
+    correspondance = {label: i for i, label in enumerate(unique_labels)}
+    logger.debug(f"Correspondance {correspondance}")
+    return correspondance
+
+
+def get_unique_labels(labels):
+    # Si labels est un tableau NumPy, on l'aplatit en une liste unidimensionnelle
+    if isinstance(labels, np.ndarray):
+        labels = labels.flatten()  # Aplatir le tableau si nécessaire
+    # Ensuite, on peut obtenir les labels uniques
+    unique_labels = list(set(labels))
+    return unique_labels
+
+
+def generate_numeric_correspondance_np(labels_np):
+    '''
+    Génère une correspondance entre les labels et des valeurs numériques uniques.
+    '''
+    logger.debug(
+        f"---------generate_numeric_correspondance(labels_np={labels_np})")
+    unique_labels = get_unique_labels(labels_np)
     logger.debug(f"Unique labels {unique_labels}")
     correspondance = {label: i for i, label in enumerate(unique_labels)}
     logger.debug(f"Correspondance {correspondance}")

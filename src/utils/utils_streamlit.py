@@ -14,7 +14,7 @@ import pandas as pd
 import os
 import streamlit as st
 # Import des fichiers de configuration et des informations sur les logs
-from src.config.run_config import init_paths, user_api_info
+from src.config.run_config import init_paths, user_api_info, urls_info
 from src.config.run_config import admin_api_info, monitoring_api_info
 
 logger = setup_logging("UTILS_STREAMLIT")
@@ -441,6 +441,26 @@ def health_check_apps():
             df_urls.at[index, 'Status'] = 'DOWN'
     df_urls = df_urls.reset_index(drop=True)
     df_urls['Port'] = df_urls['Port'].astype(str)
+    return df_urls
+
+
+def health_check_apps_run():
+    urls = {}
+    for url_key in urls_info.keys():
+        url = urls_info[url_key]
+        logger.debug(f"URL Service {url_key} / {url}")
+
+        try:
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                urls[url_key] = 'UP'
+            else:
+                urls[url_key] = 'ERROR'
+        except requests.exceptions.Timeout:
+            urls[url_key] = 'Timeout'
+        except requests.exceptions.ConnectionError:
+            urls[url_key] = 'DOWN'
+    df_urls = pd.DataFrame(list(urls.items()), columns=['Key', 'Value'])
     return df_urls
 
 # Fonction de connexion

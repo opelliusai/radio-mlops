@@ -18,8 +18,6 @@ mlflow.set_registry_uri(mlflow_uri)
 
 
 def monitor_new_data_predict(feature_extractor, new_images, dataset_path):
-    # Supposons que 'new_images' soit un nouvel ensemble d'images que vous souhaitez surveiller
-    # new_images = np.random.rand(1000, 32, 32, 3)  # Exemple de nouvelles images
 
     new_data = preprocess_unlabeled_data(new_images, 224, 3)
     train_data = preprocess_data(dataset_path, size=224, dim=3)
