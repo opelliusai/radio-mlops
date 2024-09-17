@@ -353,7 +353,7 @@ et versionnées sous le format COVID-19_Radiography_Dataset-X.Y (X.Y étant la d
 - Le log de téléchargement seront stockés dans 
 data/processed/dataset_logging/kaggle_dataset_logging.csv
 
-2 Construction des données de référence
+2. Construction des données de référence
 -- API Admin / Endpoint **/update_dataset**
 source_type="KAGGLE"
 - Les données seront stockées dans le volume *docker-compose_shared-data*
@@ -362,7 +362,7 @@ et versionnées sous le format  RadioPulmonaire-X.Y (X.Y étant la dernière ver
 - Le log de téléchargement seront stockés dans 
 data/processed/dataset_logging/ref_dataset_logging.csv
 
-3 Entrainement de modèles
+3. Entrainement de modèles
 -- API Admin ou Streamlit Page Entrainement/Reentrainement de modele
 Entrainement initiale : 
 -- API: Options par défaut
@@ -371,12 +371,12 @@ Option "Entrainement complet (Données de référence uniquement)
 - Sélection du Dataset
 - Hyperparamètre: Max Epochs / Num trials
 
-4 Déploiement d'un modèle initial
+4. Déploiement d'un modèle initial
 -- Streamlit : Information et déploiement de modèles
   - Déploiement immédiat: Bouton "Forcer le déploiement"
   - Déploiement par batch airflow: Bouton "Préparer pour le déploiement"
 
-5 Prédiction 
+5. Prédiction 
 -- Streamlit: Connexion utilisateur
 
 ### Annexe 1 - Github - Gestion des secrets<br>
@@ -397,6 +397,10 @@ Option "Entrainement complet (Données de référence uniquement)
     "cle_user2": {"username": "identifiant2", "password": "mot_de_passe2", "user_name":"nom_prenom","role": "admin"},
     ...
 }
+
+### Annexe 3 - Github Actions - Workflows<br>
+1 workflow par image docker **Docker Build <nom_image>**
+1 workflow pour la construction et le push de toutes les images: **Docker Build all containers**
 
 [Retour au menu principal](#acc%C3%A8s-rapide)
 [Retour aux instructions](#instructions)
