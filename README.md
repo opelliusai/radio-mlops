@@ -216,14 +216,14 @@ Les instructions sont listées par type d'usage souhaité par le développeur
 - [Utiliser les images Dockerhub](#-utilisation-des-images-docker-sur-dockerhub)
 - [Construire les images et démarrer les conteneurs Docker](#-construire-les-images-et-d%C3%A9marrer-les-conteneurs-docker)
 - [Lancer les applications localement (Maintenance du code)](#lancer-les-applications-localement-maintenance-du-code)
-- [Exemple de mise en place d'un environnement de machine learning] (#exemple-de-mise-en-place-dun-environnement-de-machine-learning-pour-le-projet)
+- [Exemple de mise en place d'un environnement de machine learning](#exemple-de-mise-en-place-dun-environnement-de-machine-learning-pour-le-projet)
 
 ⚠️ : Les instructions Docker supposent que les pré-requis sont maitrisés:
 - Installation de Docker sur son poste de développement ou de serveur de déploiement
 - Compte Docker créé sur Dockerhub pour récupérer les images
 
 ### 🐳 **Utilisation des images Docker sur Dockerhub**
-** Repository de référence: [https://hub.docker.com/repositories/opelliusai](https://hub.docker.com/repositories/opelliusai)
+**Repository de référence:** [https://hub.docker.com/repositories/opelliusai](https://hub.docker.com/repositories/opelliusai)
 
 ### 1. Liste des images disponibles
 | Image   | URL   | 
