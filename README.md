@@ -55,7 +55,7 @@ Plusieurs conteneurs Dockers sont créés pour le projet avec 3 groupement princ
 
 ![](/references/Gestion_donnees.png)
 3 types de données:
-- **Données Kaggle**: Les données source initiales qui servent à entrainer les premières modèles
+- **Données Kaggle**: Les données source initiales qui servent à entrainer les premiers modèles
 - **Données de Production**: Les données enrichies par les utilisateurs lors des demandes de diagnostic
 - **Données de Référence**: L'agrégation des données et qui sont effectivement utilisées pour entrainer les modèle
 
